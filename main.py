@@ -5,28 +5,30 @@ import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-# --- CORREÇÃO OBRIGATÓRIA PARA OS ERROS DO RENDER ---
+# --- TRUQUE DE PORTA PARA O RENDER NÃO DERRUBAR O BOT ---
 class ServidorFalso(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
-        self.wfile.write(b"Bot Tinder Online!")
+        self.wfile.write(b"Bot Tinder rodando 24h!")
 
 def rodar_servidor_falso():
-    # Puxa a porta padrão que o Render exige automaticamente
     porta = int(os.environ.get("PORT", 10000))
     server = HTTPServer(('0.0.0.0', porta), ServidorFalso)
     server.serve_forever()
 
-# Abre o canal de comunicação para sumir com os logs vermelhos do fim
+# Inicia o servidor falso em segundo plano
 threading.Thread(target=rodar_servidor_falso, daemon=True).start()
 
-# --- INSTÂNCIA DO BOT TELEGRAM ---
-API_TOKEN = '8733102844:AAEpegvJAW62cnAOeP-ipHSnKhCqe2S7dz4'
+# --- CONEXÃO DO BOT TELEGRAM ---
+API_TOKEN = '8733102844:AAEpegvJAW62cnAOeP-iphHSnKhCqe257dz4'
 bot = telebot.TeleBot(API_TOKEN)
 dados_cadastro = {}
 
+# --- FUNÇÕES DO BANCO DE DADOS (CORRIGIDAS) ---
+def conectar_bd():
+    return sqlite3.connect('tinder.db')
 
 def iniciar_bd():
     conn = conectar_bd()
@@ -44,7 +46,10 @@ def iniciar_bd():
     conn.commit()
     conn.close()
 
+# Executa a inicialização do banco
 iniciar_bd()
+
+# ----------------- FLUXO DE CADASTRO -----------------
 
 @bot.message_handler(commands=['cadastro'])
 def iniciar_cadastro(message):
@@ -83,12 +88,16 @@ def salvar_foto(message):
         bot.send_message(id_usuario, "❌ Por favor, envie uma foto válida.")
         bot.register_next_step_handler(message, salvar_foto)
 
+# ----------------- COMANDO SAIR -----------------
+
 @bot.message_handler(commands=['sair', 'deletar'])
 def confirmar_saida(message):
     id_usuario = message.chat.id
     markup = InlineKeyboardMarkup()
     markup.row(InlineKeyboardButton("✅ Sim, apagar tudo", callback_data="confirmar_deletar"), InlineKeyboardButton("❌ Não, continuar", callback_data="cancelar_deletar"))
     bot.send_message(id_usuario, "⚠️ Tem certeza que deseja apagar seu perfil?", reply_markup=markup)
+
+# ----------------- FLUXO DO TINDER -----------------
 
 @bot.message_handler(commands=['start', 'tinder'])
 def mostrar_proximo_perfil(message):
@@ -111,6 +120,8 @@ def mostrar_proximo_perfil(message):
     else:
         bot.send_message(my_id, "🌟 Você já viu todos os perfis cadastrados no momento!")
 
+# ----------------- TRATAMENTO DOS BOTÕES -----------------
+
 @bot.callback_query_handler(func=lambda call: True)
 def tratar_botoes(call):
     my_id = call.message.chat.id
@@ -130,7 +141,7 @@ def tratar_botoes(call):
         bot.answer_callback_query(call.id, "Mantido! 😉")
         return
     elif call.data.startswith("curtir_"):
-        alvo_id = int(call.data.split("_")[1])
+        alvo_id = int(call.data.split("_"))
         conn = conectar_bd()
         cursor = conn.cursor()
         try:
