@@ -5,29 +5,28 @@ import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-# --- TRUQUE PARA O RENDER NÃO DERRUBAR O BOT ---
+# --- CORREÇÃO OBRIGATÓRIA PARA OS ERROS DO RENDER ---
 class ServidorFalso(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
-        self.wfile.write(b"Bot Tinder rodando 24h!")
+        self.wfile.write(b"Bot Tinder Online!")
 
 def rodar_servidor_falso():
+    # Puxa a porta padrão que o Render exige automaticamente
     porta = int(os.environ.get("PORT", 10000))
     server = HTTPServer(('0.0.0.0', porta), ServidorFalso)
     server.serve_forever()
 
-# Inicia o servidor falso em segundo plano
+# Abre o canal de comunicação para sumir com os logs vermelhos do fim
 threading.Thread(target=rodar_servidor_falso, daemon=True).start()
 
-# --- CÓDIGO DO SEU BOT TELEGRAM ---
+# --- INSTÂNCIA DO BOT TELEGRAM ---
 API_TOKEN = '8733102844:AAEpegvJAW62cnAOeP-iphHSnKhCqe257dz4'
 bot = telebot.TeleBot(API_TOKEN)
 dados_cadastro = {}
 
-def conectar_bd():
-    return sqlite3.connect('tinder.db')
 
 def iniciar_bd():
     conn = conectar_bd()
