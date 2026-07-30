@@ -224,15 +224,26 @@ def ajuda(message):
 # CALLBACK DO MENU
 # ==========================================================
 
+@bot.callback_query_handler(func=lambda call: call.data == "menu_inicio")
+def voltar_menu(call):
+
+    try:
+        bot.delete_message(
+            call.message.chat.id,
+            call.message.message_id
+        )
+    except:
+        pass
+
+    enviar_menu(call.message.chat.id)
+
+
 @bot.callback_query_handler(func=lambda call: call.data.startswith("menu_"))
-def callback_menu(call):
+def botoes_menu(call):
 
     bot.answer_callback_query(call.id)
 
-    if call.data == "menu_cadastro":
-        iniciar_cadastro(call.message)
-
-    elif call.data == "menu_tinder":
+    if call.data == "menu_tinder":
         mostrar_proximo_perfil(call.message)
 
     elif call.data == "menu_perfil":
@@ -244,11 +255,15 @@ def callback_menu(call):
     elif call.data == "menu_matches":
         ver_meus_matches(call.message)
 
-    elif call.data == "menu_deletar":
-        confirmar_saida(call.message)
+    elif call.data == "menu_stats":
+        estatisticas_perfil(call.message)
 
-    elif call.data == "menu_ajuda":
-        ajuda(call.message)
+    elif call.data == "menu_deletar":
+        confirmar_deletar(call.message)
+        
+    elif call.data == "menu_cadastro":
+        abrir_cadastro(call.message) 
+
         # ==========================================================
 # CADASTRO
 # ==========================================================
