@@ -444,8 +444,8 @@ def salvar_foto(message):
     conn = conectar()
     cursor = conn.cursor()
 
-        cursor.execute("""
-            INSERT INTO perfis(
+    cursor.execute("""
+        INSERT INTO perfis(
             telegram_id,
             nome,
             idade,
