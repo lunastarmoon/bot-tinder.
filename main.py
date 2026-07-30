@@ -265,7 +265,7 @@ def botoes_menu(call):
     elif call.data == "menu_deletar":
         confirmar_deletar(call.message)
 
-        elif call.data == "menu_ajuda":
+    elif call.data == "menu_ajuda":
         bot.send_message(
             call.message.chat.id,
             "❓ Ajuda\n\n"
@@ -274,7 +274,7 @@ def botoes_menu(call):
             "👤 Meu Perfil - veja seus dados\n"
             "💌 Matches - veja seus matches\n"
             "✏️ Editar Perfil - edite seu perfil\n"
-            "🗑 Excluir Perfil - exclua seu perfil todo"
+            "🗑 Excluir Perfil - exclua seu perfil todo\n"
     )
         # ==========================================================
 # CADASTRO
