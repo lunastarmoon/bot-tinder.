@@ -247,10 +247,10 @@ def botoes_menu(call):
     if call.data == "menu_tinder":
         mostrar_proximo_perfil(call.message)
 
-elif call.data == "menu_perfil":
+   elif call.data == "menu_perfil":
         ver_meu_perfil(call.message)
 
-elif call.data == "menu_cadastro":
+   elif call.data == "menu_cadastro":
         iniciar_cadastro(call.message)
 
    elif call.data == "menu_editar":
@@ -259,10 +259,10 @@ elif call.data == "menu_cadastro":
    elif call.data == "menu_matches":
         ver_meus_matches(call.message)
 
-    elif call.data == "menu_stats":
+   elif call.data == "menu_stats":
         estatisticas_perfil(call.message)
 
-    elif call.data == "menu_deletar":
+   elif call.data == "menu_deletar":
         confirmar_deletar(call.message)
 
         # ==========================================================
