@@ -1798,4 +1798,11 @@ if __name__ == "__main__":
     print("🤖 Aguardando mensagens...")
     print("===================================")
 
+    @bot.callback_query_handler(func=lambda call: call.data == "menu_cadastro")
+def abrir_cadastro(call):
+
+    bot.answer_callback_query(call.id)
+
+    iniciar_cadastro(call.message)
+
     iniciar_bot()
