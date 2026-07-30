@@ -133,7 +133,7 @@ def teclado_menu():
     markup.add(
         InlineKeyboardButton(
             "📝 Criar Perfil",
-            callback_data="menu_cadastro"
+            callback_data="menu_criar"
         ),
         InlineKeyboardButton(
             "🗑 Excluir Perfil",
@@ -263,7 +263,7 @@ def botoes_menu(call):
         confirmar_deletar(call.message)
         
     elif call.data == "menu_criar_perfil":
-        abrir_criar_perfil(call.message) 
+        abrir_criar_meu_perfil(call.message) 
 
         # ==========================================================
 # CADASTRO
