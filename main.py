@@ -14,7 +14,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 # CONFIGURAÇÕES
 # ==========================================================
 
-TOKEN = '8733102844:AAF2rm-nhHnK12Br8h-wHDc-aQdPzrVMtfE'
+TOKEN = '8733102844:AAHvzrKXQJ4HRfwCdEEkzA_BYCjYDnNYEns'
 
 bot = telebot.TeleBot(TOKEN, parse_mode="Markdown")
 
@@ -273,6 +273,8 @@ def botoes_menu(call):
             "❤️ Tinder - veja perfis\n"
             "👤 Meu Perfil - veja seus dados\n"
             "💌 Matches - veja seus matches"
+            "✏️ Editar Perfil - edite seu perfil"
+            "🗑 Excluir Perfim - exlcua seu perfil todo"
         )
 
         # ==========================================================
