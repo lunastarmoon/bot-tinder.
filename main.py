@@ -221,41 +221,50 @@ def ajuda(message):
     bot.send_message(message.chat.id, texto)
 
 # ==========================================================
-# CALLBACK DO MENU
+# NOVOS BOTÕES DO MENU
 # ==========================================================
 
-@bot.callback_query_handler(func=lambda call: call.data == "menu_inicio")
-def voltar_menu(call):
-
-    try:
-        bot.delete_message(
-            call.message.chat.id,
-            call.message.message_id
-        
-    enviar_menu(call.message.chat.id)
-
-@bot.callback_query_handler(func=lambda call.data.startswith("menu_"))
+@bot.callback_query_handler(
+    func=lambda c: c.data.startswith("menu_")
+)
 def botoes_menu(call):
+
+    user_id = call.message.chat.id
+
 
     bot.answer_callback_query(call.id)
 
-    elif call.data == "menu_tinder":
-        mostrar_proximo_perfil(call.message)
 
-        elif call.data == "menu_perfil":
-        ver_meu_perfil(call.message)
-        
-    elif call.data == "menu_editar":
-        menu_editar(call.message)
+    if call.data == "menu_stats":
 
-    elif call.data == "menu_matches":
-        ver_meus_matches(call.message)
-
-    elif call.data == "menu_stats":
         estatisticas_perfil(call.message)
 
+
+    elif call.data == "menu_tinder":
+
+        mostrar_proximo_perfil(call.message)
+
+
+    elif call.data == "menu_perfil":
+
+        ver_meu_perfil(call.message)
+
+
+    elif call.data == "menu_editar":
+
+        menu_editar(call.message)
+
+
+    elif call.data == "menu_matches":
+
+        ver_meus_matches(call.message)
+
+
     elif call.data == "menu_deletar":
+
         confirmar_deletar(call.message)
+
+
         # ==========================================================
 # CADASTRO
 # ==========================================================
