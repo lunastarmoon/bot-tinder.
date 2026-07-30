@@ -259,10 +259,10 @@ def botoes_menu(call):
     elif call.data == "menu_cadastro":
         iniciar_cadastro(call.message)
 
-elif call.data == "menu_stats":
+    elif call.data == "menu_stats":
         estatisticas_perfil(call.message)
 
-   elif call.data == "menu_deletar":
+    elif call.data == "menu_deletar":
         confirmar_deletar(call.message)
 
         # ==========================================================
