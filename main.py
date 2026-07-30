@@ -14,7 +14,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 # CONFIGURAÇÕES
 # ==========================================================
 
-TOKEN = '8733102844:AAHZAxEE75Nrz2LgMM_mMlhC7waXCxsWkNo'
+TOKEN = '8733102844:AAFvNx15ui3A_Imj_LWAMTQPFYM-P_hXmrU'
 
 bot = telebot.TeleBot(TOKEN, parse_mode="Markdown")
 
