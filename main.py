@@ -461,7 +461,10 @@ def salvar_foto(message):
 
 @bot.message_handler(commands=["perfil"])
 def ver_meu_perfil(message):
-    @bot.message_handler(commands=["matches"])
+    
+    user_id = message.chat.id
+    
+@bot.message_handler(commands=["matches"])
 def comando_matches(message):
 
     user_id = message.chat.id
@@ -509,8 +512,6 @@ def comando_matches(message):
         user_id,
         texto
     )
-
-    user_id = message.chat.id
 
     conn = conectar()
     cursor = conn.cursor()
