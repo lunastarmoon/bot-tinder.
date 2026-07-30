@@ -14,7 +14,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 # CONFIGURAÇÕES
 # ==========================================================
 
-TOKEN = '8733102844:AAHtaPhcM5DhBo_SaAsXX8AbuiEXWWPt_RU'
+TOKEN = '8733102844:AAF2rm-nhHnK12Br8h-wHDc-aQdPzrVMtfE'
 
 bot = telebot.TeleBot(TOKEN, parse_mode="Markdown")
 
@@ -179,6 +179,7 @@ def start(message):
         "Aqui você pode conhecer novas pessoas, "
         "curtir perfis e fazer matches.\n\n"
         "Para começar, crie seu perfil."
+        "Se você não for uma conta de rp não faça conta."
     )
 
     bot.send_message(
@@ -261,8 +262,8 @@ def botoes_menu(call):
     elif call.data == "menu_deletar":
         confirmar_deletar(call.message)
         
-    elif call.data == "menu_cadastro":
-        abrir_cadastro(call.message) 
+    elif call.data == "menu_criar_perfil":
+        abrir_criar_perfil(call.message) 
 
         # ==========================================================
 # CADASTRO
