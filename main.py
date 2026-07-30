@@ -234,9 +234,8 @@ def voltar_menu(call):
         )
     except:
         pass
-
+        
     enviar_menu(call.message.chat.id)
-
 
 @bot.callback_query_handler(func=lambda call.data.startswith("menu_"))
 def botoes_menu(call):
