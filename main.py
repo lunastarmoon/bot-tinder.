@@ -265,7 +265,7 @@ def botoes_menu(call):
     elif call.data == "menu_deletar":
         confirmar_deletar(call.message)
 
-   elif call.data == "menu_ajuda":
+    elif call.data == "menu_ajuda":
         bot.send_message(
             call.message.chat.id,
             "❓ Ajuda\n\n"
