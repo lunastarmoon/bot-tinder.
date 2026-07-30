@@ -166,6 +166,15 @@ def enviar_menu(chat_id):
         reply_markup=teclado_menu()
 
     )
+    InlineKeyboardButton(
+    "🆕 Criar Perfil",
+    callback_data="menu_cadastro"
+),
+
+InlineKeyboardButton(
+    "❓ Ajuda",
+    callback_data="menu_ajuda"
+)
 
 # ==========================================================
 # START
@@ -260,6 +269,39 @@ def botoes_menu(call):
 
     elif call.data == "menu_deletar":
         confirmar_deletar(call.message)
+        @bot.callback_query_handler(func=lambda call: call.data == "menu_cadastro")
+def botao_cadastro(call):
+
+    try:
+        bot.delete_message(
+            call.message.chat.id,
+            call.message.message_id
+        )
+    except:
+        pass
+
+    iniciar_cadastro(call.message)
+
+
+
+@bot.callback_query_handler(func=lambda call: call.data == "menu_ajuda")
+def botao_ajuda(call):
+
+    texto = (
+        "📖 *Ajuda do Bot*\n\n"
+        "🆕 Criar Perfil - cria seu perfil\n"
+        "❤️ Tinder - ver pessoas\n"
+        "👤 Meu Perfil - visualizar seus dados\n"
+        "✏️ Editar - atualizar informações\n"
+        "💌 Matches - ver combinações\n\n"
+        "Boa sorte nos matches! ❤️"
+    )
+
+    bot.send_message(
+        call.message.chat.id,
+        texto,
+        parse_mode="Markdown"
+                                   )
 
         # ==========================================================
 # CADASTRO
