@@ -231,9 +231,6 @@ def voltar_menu(call):
         bot.delete_message(
             call.message.chat.id,
             call.message.message_id
-        )
-    except:
-        pass
         
     enviar_menu(call.message.chat.id)
 
