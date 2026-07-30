@@ -255,7 +255,7 @@ def botoes_menu(call):
     elif call.data == "menu_deletar":
         confirmar_deletar(call.message)
 
-  elif call: call.data == "menu_cadastro") 
+  elif call.data == "menu_cadastro":
  abrir_cadastro(call.message)
 
 bot.answer_callback_query(call.id)
