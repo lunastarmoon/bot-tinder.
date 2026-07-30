@@ -238,16 +238,13 @@ def voltar_menu(call):
     enviar_menu(call.message.chat.id)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith("menu_"))
+@bot.callback_query_handler(func=lambda call.data.startswith("menu_"))
 def botoes_menu(call):
 
     bot.answer_callback_query(call.id)
 
     if call.data == "menu_tinder":
         mostrar_proximo_perfil(call.message)
-
-    elif call.data == "menu_perfil":
-        ver_meu_perfil(call.message)
         
     elif call.data == "menu_editar":
         menu_editar(call.message)
