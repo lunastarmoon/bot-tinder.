@@ -14,7 +14,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 # CONFIGURAÇÕES
 # ==========================================================
 
-TOKEN = '8733102844:AAEghsGpIFHS-DwJOVj-dajo6sYUIA7DjF0'
+TOKEN = '8733102844:AAHZAxEE75Nrz2LgMM_mMlhC7waXCxsWkNo'
 
 bot = telebot.TeleBot(TOKEN, parse_mode="Markdown")
 
@@ -114,7 +114,7 @@ def teclado_menu():
             callback_data="menu_tinder"
         ),
         InlineKeyboardButton(
-            "👤 Meu Perfil",
+            "👤 Perfil",
             callback_data="menu_perfil"
         )
     )
@@ -175,7 +175,7 @@ def enviar_menu(chat_id):
 def start(message):
 
     texto = (
-        "❤️ *Bem-vindo ao Tinder Bot!*\n\n"
+        "❤️ *Bem-vindo ao Tinder Rp!*\n\n"
         "Aqui você pode conhecer novas pessoas, "
         "curtir perfis e fazer matches.\n\n"
         "Para começar, crie seu perfil."
