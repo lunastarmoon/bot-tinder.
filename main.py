@@ -175,7 +175,7 @@ def enviar_menu(chat_id):
 def start(message):
 
     texto = (
-        "❤️ Bem-vindo ao Tinder Bot!\n\n"
+        "❤️ Bem-vindo ao Tinder Rp!\n\n"
         "Crie seu perfil, veja pessoas e encontre matches."
     )
 
