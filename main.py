@@ -336,6 +336,7 @@ def salvar_nome(message):
         return
 
     dados_cadastro[user_id]["nome"] = nome
+    dados_cadastro[user_id]["username"] = message.from_user.username
 
     msg = bot.send_message(
         user_id,
