@@ -179,7 +179,7 @@ def start(message):
         "Aqui você pode conhecer novas pessoas, "
         "curtir perfis e fazer matches.\n\n"
         "Para começar, crie seu perfil." 
-        "Se você não for uma conta de rp não faça conta."
+        "Se você não for uma conta derpnãofaçaconta."
     )
 
     bot.send_message(
