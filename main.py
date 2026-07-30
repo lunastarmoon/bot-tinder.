@@ -14,7 +14,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 # CONFIGURAÇÕES
 # ==========================================================
 
-TOKEN = '8733102844:AAHvzrKXQJ4HRfwCdEEkzA_BYCjYDnNYEns'
+TOKEN = '8733102844:AAF4d6rUpjGaQvxyNKFBO4vdHyiJtCXBJvE'
 
 bot = telebot.TeleBot(TOKEN, parse_mode="Markdown")
 
@@ -266,18 +266,16 @@ def botoes_menu(call):
         confirmar_deletar(call.message)
 
     elif call.data == "menu_ajuda":
-        bot.send_message(
-            call.message.chat.id,
-            "❓ Ajuda\n\n"
-            "📝 Criar Perfil - faça seu cadastro\n"
-            "❤️ Tinder - veja perfis\n"
-            "👤 Meu Perfil - veja seus dados\n"
-            "💌 Matches - veja seus matches"
-            
-            "✏️ Editar Perfil - edite seu perfil"
-            
-            "🗑 Excluir Perfim - exlcua seu perfil todo"
-        )
+    bot.send_message(
+        call.message.chat.id,
+        "❓ Ajuda\n\n"
+        "📝 Criar Perfil - faça seu cadastro\n"
+        "❤️ Tinder - veja perfis\n"
+        "👤 Meu Perfil - veja seus dados\n"
+        "💌 Matches - veja seus matches\n"
+        "✏️ Editar Perfil - edite seu perfil\n"
+        "🗑 Excluir Perfil - exclua seu perfil todo"
+    )
 
         # ==========================================================
 # CADASTRO
