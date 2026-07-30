@@ -232,7 +232,6 @@ def ajuda(message):
 # ==========================================================
 # NOVOS BOTÕES DO MENU
 # ==========================================================
-
 @bot.callback_query_handler(func=lambda call: call.data == "menu_inicio")
 def voltar_menu(call):
 
@@ -244,7 +243,7 @@ def voltar_menu(call):
     except:
         pass
 
-    enviar_menu(call.message.chat.id)
+    (call.message.chat.id)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("menu_"))
@@ -252,7 +251,7 @@ def botoes_menu(call):
 
     bot.answer_callback_query(call.id)
 
-    if call.data == "menu_tinder":
+    elif call.data == "menu_tinder":
         mostrar_proximo_perfil(call.message)
 
     elif call.data == "menu_perfil":
@@ -269,39 +268,6 @@ def botoes_menu(call):
 
     elif call.data == "menu_deletar":
         confirmar_deletar(call.message)
-        @bot.callback_query_handler(func=lambda call: call.data == "menu_cadastro")
-def botao_cadastro(call):
-
-    try:
-        bot.delete_message(
-            call.message.chat.id,
-            call.message.message_id
-        )
-    except:
-        pass
-
-    iniciar_cadastro(call.message)
-
-
-
-@bot.callback_query_handler(func=lambda call: call.data == "menu_ajuda")
-def botao_ajuda(call):
-
-    texto = (
-        "📖 *Ajuda do Bot*\n\n"
-        "🆕 Criar Perfil - cria seu perfil\n"
-        "❤️ Tinder - ver pessoas\n"
-        "👤 Meu Perfil - visualizar seus dados\n"
-        "✏️ Editar - atualizar informações\n"
-        "💌 Matches - ver combinações\n\n"
-        "Boa sorte nos matches! ❤️"
-    )
-
-    bot.send_message(
-        call.message.chat.id,
-        texto,
-        parse_mode="Markdown"
-                                   )
 
         # ==========================================================
 # CADASTRO
