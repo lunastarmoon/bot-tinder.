@@ -1106,3 +1106,376 @@ def voltar_menu(call):
         pass
 
     enviar_menu(call.message.chat.id)
+    # ==========================================================
+# ESTATÍSTICAS DO PERFIL
+# ==========================================================
+
+@bot.message_handler(commands=["stats"])
+def estatisticas_perfil(message):
+
+    user_id = message.chat.id
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    # Curtidas recebidas
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM curtidas
+        WHERE para_id=?
+    """, (user_id,))
+
+    curtidas = cursor.fetchone()[0]
+
+
+    # Curtidas enviadas
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM curtidas
+        WHERE de_id=?
+    """, (user_id,))
+
+    enviadas = cursor.fetchone()[0]
+
+
+    # Matches
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM curtidas c1
+
+        WHERE c1.de_id=?
+
+        AND EXISTS(
+
+            SELECT 1
+
+            FROM curtidas c2
+
+            WHERE c2.de_id=c1.para_id
+
+            AND c2.para_id=?
+
+        )
+
+    """, (user_id, user_id))
+
+    matches = cursor.fetchone()[0]
+
+
+    conn.close()
+
+
+    texto = (
+        "📊 *Estatísticas do Perfil*\n\n"
+        f"❤️ Curtidas recebidas: {curtidas}\n"
+        f"💌 Matches: {matches}\n"
+        f"🔥 Perfis curtidos por você: {enviadas}"
+    )
+
+
+    markup = InlineKeyboardMarkup()
+
+    markup.add(
+        InlineKeyboardButton(
+            "👤 Ver Perfil",
+            callback_data="menu_perfil"
+        ),
+
+        InlineKeyboardButton(
+            "🏠 Menu",
+            callback_data="menu_inicio"
+        )
+    )
+
+
+    bot.send_message(
+        user_id,
+        texto,
+        reply_markup=markup
+    )
+
+
+# ==========================================================
+# MELHORAR VISUAL DO PERFIL
+# ==========================================================
+
+@bot.callback_query_handler(
+    func=lambda c: c.data == "menu_perfil"
+)
+def abrir_perfil_botao(call):
+
+    try:
+        bot.delete_message(
+            call.message.chat.id,
+            call.message.message_id
+        )
+    except:
+        pass
+
+    ver_meu_perfil(call.message)
+    # ==========================================================
+# EXCLUIR PERFIL
+# ==========================================================
+
+@bot.message_handler(commands=["deletar"])
+def confirmar_deletar(message):
+
+    user_id = message.chat.id
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT telegram_id FROM perfis WHERE telegram_id=?",
+        (user_id,)
+    )
+
+    existe = cursor.fetchone()
+
+    conn.close()
+
+
+    if not existe:
+
+        bot.send_message(
+            user_id,
+            "❌ Você não possui um perfil para excluir."
+        )
+
+        return
+
+
+    markup = InlineKeyboardMarkup(row_width=2)
+
+    markup.add(
+
+        InlineKeyboardButton(
+            "✅ Sim, apagar",
+            callback_data="confirmar_delete"
+        ),
+
+        InlineKeyboardButton(
+            "❌ Cancelar",
+            callback_data="cancelar_delete"
+        )
+
+    )
+
+
+    bot.send_message(
+
+        user_id,
+
+        "⚠️ *Tem certeza que deseja apagar seu perfil?*\n\n"
+        "Essa ação não pode ser desfeita.",
+
+        reply_markup=markup
+
+    )
+
+
+# ==========================================================
+# CONFIRMAÇÃO DE EXCLUSÃO
+# ==========================================================
+
+@bot.callback_query_handler(
+    func=lambda c: c.data in [
+        "confirmar_delete",
+        "cancelar_delete"
+    ]
+)
+def processar_delete(call):
+
+    user_id = call.message.chat.id
+
+
+    if call.data == "cancelar_delete":
+
+        bot.answer_callback_query(
+            call.id,
+            "Cancelado."
+        )
+
+        bot.edit_message_text(
+            "✅ Exclusão cancelada.",
+            user_id,
+            call.message.message_id
+        )
+
+        return
+
+
+
+    # Apagar tudo
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+
+    cursor.execute(
+        """
+        DELETE FROM perfis
+        WHERE telegram_id=?
+        """,
+        (user_id,)
+    )
+
+
+    cursor.execute(
+        """
+        DELETE FROM curtidas
+        WHERE de_id=?
+        OR para_id=?
+        """,
+        (user_id, user_id)
+    )
+
+
+    conn.commit()
+    conn.close()
+
+
+    bot.answer_callback_query(
+        call.id,
+        "Perfil apagado!"
+    )
+
+
+    bot.edit_message_text(
+
+        "🗑️ *Seu perfil foi removido com sucesso.*\n\n"
+        "Você pode criar outro usando /cadastro.",
+
+        user_id,
+
+        call.message.message_id
+
+        )
+    # ==========================================================
+# FUNÇÃO DE VERIFICAÇÃO DE PERFIL
+# ==========================================================
+
+def possui_perfil(user_id):
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT telegram_id
+        FROM perfis
+        WHERE telegram_id=?
+        """,
+        (user_id,)
+    )
+
+    resultado = cursor.fetchone()
+
+    conn.close()
+
+    return resultado is not None
+
+
+# ==========================================================
+# PROTEÇÃO DO TINDER
+# ==========================================================
+
+def verificar_tinder(message):
+
+    user_id = message.chat.id
+
+    if not possui_perfil(user_id):
+
+        bot.send_message(
+            user_id,
+            "⚠️ Você precisa criar um perfil antes.\n\nUse /cadastro."
+        )
+
+        return False
+
+    return True
+
+
+# ==========================================================
+# BOTÃO CONTINUAR TINDER
+# ==========================================================
+
+@bot.callback_query_handler(
+    func=lambda c: c.data == "continuar_tinder"
+)
+def continuar_tinder_botao(call):
+
+    try:
+
+        bot.delete_message(
+            call.message.chat.id,
+            call.message.message_id
+        )
+
+    except:
+        pass
+
+
+    mostrar_proximo_perfil(call.message)
+
+
+
+# ==========================================================
+# COMANDO TINDER COM PROTEÇÃO
+# ==========================================================
+
+@bot.message_handler(commands=["ver"])
+def abrir_tinder(message):
+
+    if verificar_tinder(message):
+
+        mostrar_proximo_perfil(message)
+
+
+
+# ==========================================================
+# TRATAMENTO DE ERROS GERAIS
+# ==========================================================
+
+@bot.message_handler(
+    content_types=[
+        "text",
+        "photo",
+        "sticker",
+        "video"
+    ]
+)
+def mensagens_sem_funcao(message):
+
+    comandos = [
+        "/start",
+        "/cadastro",
+        "/perfil",
+        "/editar",
+        "/tinder",
+        "/matches",
+        "/stats",
+        "/deletar"
+    ]
+
+
+    if message.text in comandos:
+
+        return
+
+
+    # Não responde durante cadastros
+    if message.chat.id in dados_cadastro:
+
+        return
+
+
+    bot.send_message(
+
+        message.chat.id,
+
+        "🤖 Use o menu abaixo para navegar.",
+
+        reply_markup=teclado_menu()
+
+    )
