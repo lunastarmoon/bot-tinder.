@@ -21,7 +21,7 @@ def rodar_servidor_falso():
 threading.Thread(target=rodar_servidor_falso, daemon=True).start()
 
 # --- CONEXÃO DO BOT TELEGRAM ---
-API_TOKEN = '8733102844:AAEghsGpIFHS-DwJOVj-dajo6sYUIA7DjF0'
+API_TOKEN = '8733102844:AAEy0gBNTkmpJ60LyRSQUKjfWHQFGm9XQLw'
 bot = telebot.TeleBot(API_TOKEN)
 
 dados_cadastro = {}
