@@ -444,15 +444,14 @@ def salvar_foto(message):
     conn = conectar()
     cursor = conn.cursor()
 
-    cursor.execute("""
-    cursor.execute("""
+        cursor.execute("""
         INSERT INTO perfis(
             telegram_id,
             nome,
             idade,
             bio,
             foto,
-            username,
+            username
         )
         VALUES (?, ?, ?, ?, ?, ?)
     """, (
@@ -463,10 +462,6 @@ def salvar_foto(message):
         foto,
         message.from_user.username
     ))
-
-    conn.commit()
-    conn.close()
-
     del dados_cadastro[user_id]
 
     bot.send_message(
