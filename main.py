@@ -754,3 +754,355 @@ def salvar_edicao_foto(message):
         user_id,
         "✅ Foto atualizada!"
     )
+    # ==========================================================
+# TINDER
+# ==========================================================
+
+@bot.message_handler(commands=["tinder"])
+def mostrar_proximo_perfil(message):
+
+    user_id = message.chat.id
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    # Verifica se o usuário possui perfil
+    cursor.execute(
+        "SELECT telegram_id FROM perfis WHERE telegram_id=?",
+        (user_id,)
+    )
+
+    if not cursor.fetchone():
+
+        conn.close()
+
+        bot.send_message(
+            user_id,
+            "❌ Você precisa criar um perfil primeiro.\n\nUse /cadastro."
+        )
+        return
+
+    # Escolhe um perfil aleatório
+    cursor.execute("""
+        SELECT
+            telegram_id,
+            nome,
+            idade,
+            bio,
+            foto
+        FROM perfis
+
+        WHERE telegram_id != ?
+
+        AND telegram_id NOT IN(
+
+            SELECT para_id
+
+            FROM curtidas
+
+            WHERE de_id=?
+
+        )
+
+        ORDER BY RANDOM()
+
+        LIMIT 1
+
+    """, (user_id, user_id))
+
+    perfil = cursor.fetchone()
+
+    conn.close()
+
+    if not perfil:
+
+        bot.send_message(
+            user_id,
+            "🎉 Você já viu todos os perfis disponíveis.\n\nVolte mais tarde."
+        )
+
+        return
+
+    perfil_id, nome, idade, bio, foto = perfil
+
+    markup = InlineKeyboardMarkup(row_width=2)
+
+    markup.add(
+
+        InlineKeyboardButton(
+            "❌",
+            callback_data=f"nao_{perfil_id}"
+        ),
+
+        InlineKeyboardButton(
+            "❤️",
+            callback_data=f"curtir_{perfil_id}"
+        )
+
+    )
+
+    markup.add(
+
+        InlineKeyboardButton(
+            "🏠 Menu",
+            callback_data="menu_inicio"
+        )
+
+    )
+
+    legenda = (
+        f"👤 *{nome}*\n"
+        f"🎂 {idade} anos\n\n"
+        f"📝 {bio}"
+    )
+
+    bot.send_photo(
+
+        user_id,
+
+        foto,
+
+        caption=legenda,
+
+        reply_markup=markup
+
+    )
+
+# ==========================================================
+# BOTÃO ❌ NÃO CURTIR
+# ==========================================================
+
+@bot.callback_query_handler(func=lambda c: c.data.startswith("nao_"))
+def nao_curtir(call):
+
+    user_id = call.message.chat.id
+
+    bot.answer_callback_query(
+        call.id,
+        "Perfil ignorado."
+    )
+
+    try:
+
+        bot.delete_message(
+            user_id,
+            call.message.message_id
+        )
+
+    except:
+        pass
+
+    mostrar_proximo_perfil(call.message)
+    # ==========================================================
+# BOTÃO ❤️ CURTIR
+# ==========================================================
+
+@bot.callback_query_handler(func=lambda c: c.data.startswith("curtir_"))
+def curtir_perfil(call):
+
+    user_id = call.message.chat.id
+
+    perfil_id = int(call.data.split("_")[1])
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    # Salva a curtida
+    try:
+
+        cursor.execute("""
+            INSERT INTO curtidas(
+                de_id,
+                para_id
+            )
+            VALUES(?, ?)
+        """, (user_id, perfil_id))
+
+        conn.commit()
+
+    except sqlite3.IntegrityError:
+        pass
+
+    # Verifica se existe match
+    cursor.execute("""
+        SELECT 1
+        FROM curtidas
+        WHERE de_id=?
+        AND para_id=?
+    """, (perfil_id, user_id))
+
+    match = cursor.fetchone()
+
+    # Nome de quem curtiu
+    cursor.execute("""
+        SELECT nome
+        FROM perfis
+        WHERE telegram_id=?
+    """, (user_id,))
+
+    meu_nome = cursor.fetchone()[0]
+
+    # Nome da outra pessoa
+    cursor.execute("""
+        SELECT nome
+        FROM perfis
+        WHERE telegram_id=?
+    """, (perfil_id,))
+
+    nome_alvo = cursor.fetchone()[0]
+
+    conn.close()
+
+    try:
+        bot.delete_message(
+            user_id,
+            call.message.message_id
+        )
+    except:
+        pass
+
+    # ==========================
+    # MATCH
+    # ==========================
+
+    if match:
+
+        bot.send_message(
+            user_id,
+            f"🎉 *É UM MATCH!*\n\n"
+            f"Você e *{nome_alvo}* curtiram um ao outro! ❤️"
+        )
+
+        try:
+
+            bot.send_message(
+                perfil_id,
+                f"🎉 *É UM MATCH!*\n\n"
+                f"*{meu_nome}* também curtiu você! ❤️"
+            )
+
+        except:
+            pass
+
+    else:
+
+        bot.answer_callback_query(
+            call.id,
+            "❤️ Curtida enviada!"
+        )
+
+    # Mostra outro perfil
+    mostrar_proximo_perfil(call.message)
+    # ==========================================================
+# VER MATCHES
+# ==========================================================
+
+@bot.message_handler(commands=["matches"])
+def ver_meus_matches(message):
+
+    user_id = message.chat.id
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT p.nome
+        FROM perfis p
+
+        WHERE p.telegram_id IN (
+
+            SELECT para_id
+            FROM curtidas
+            WHERE de_id=?
+
+        )
+
+        AND p.telegram_id IN (
+
+            SELECT de_id
+            FROM curtidas
+            WHERE para_id=?
+
+        )
+
+        ORDER BY p.nome
+    """, (user_id, user_id))
+
+    matches = cursor.fetchall()
+
+    conn.close()
+
+    if not matches:
+
+        bot.send_message(
+            user_id,
+            "💔 Você ainda não possui nenhum match."
+        )
+        return
+
+    texto = "💌 *Seus Matches*\n\n"
+
+    for nome in matches:
+        texto += f"❤️ {nome[0]}\n"
+
+    markup = InlineKeyboardMarkup(row_width=2)
+
+    markup.add(
+
+        InlineKeyboardButton(
+            "❤️ Continuar",
+            callback_data="continuar_tinder"
+        ),
+
+        InlineKeyboardButton(
+            "🏠 Menu",
+            callback_data="menu_inicio"
+        )
+
+    )
+
+    bot.send_message(
+        user_id,
+        texto,
+        reply_markup=markup
+    )
+
+
+# ==========================================================
+# BOTÕES DO MATCH
+# ==========================================================
+
+@bot.callback_query_handler(
+    func=lambda c: c.data == "continuar_tinder"
+)
+def continuar_tinder(call):
+
+    try:
+        bot.delete_message(
+            call.message.chat.id,
+            call.message.message_id
+        )
+    except:
+        pass
+
+    mostrar_proximo_perfil(call.message)
+
+
+# ==========================================================
+# MENU
+# ==========================================================
+
+@bot.callback_query_handler(
+    func=lambda c: c.data == "menu_inicio"
+)
+def voltar_menu(call):
+
+    try:
+        bot.delete_message(
+            call.message.chat.id,
+            call.message.message_id
+        )
+    except:
+        pass
+
+    enviar_menu(call.message.chat.id)
