@@ -463,6 +463,9 @@ def salvar_foto(message):
         message.from_user.username
     ))
 
+        conn.commit()
+        conn.close()
+
     del dados_cadastro[user_id]
 
     bot.send_message(
