@@ -258,8 +258,6 @@ def botoes_menu(call):
     except:
         pass
 
-    ver_meu_perfil(call.message)
-
     elif call.data == "menu_editar":
         menu_editar(call.message)
 
