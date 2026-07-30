@@ -179,6 +179,7 @@ def start(message):
         "Aqui você pode conhecer novas pessoas, "
         "curtir perfis e fazer matches.\n\n"
         "Para começar, crie seu perfil." 
+        "Se você não for uma conta derpnãofaçaconta."
     )
 
     bot.send_message(
@@ -246,16 +247,16 @@ def botoes_menu(call):
     if call.data == "menu_tinder":
         mostrar_proximo_perfil(call.message)
 
-    elif call.data == "menu_perfil":
+elif call.data == "menu_perfil":
         ver_meu_perfil(call.message)
 
-    elif call.data == "menu_cadastro":
-    iniciar_cadastro(call.message)
+elif call.data == "menu_cadastro":
+        iniciar_cadastro(call.message)
 
-    elif call.data == "menu_editar":
+   elif call.data == "menu_editar":
         menu_editar(call.message)
 
-    elif call.data == "menu_matches":
+   elif call.data == "menu_matches":
         ver_meus_matches(call.message)
 
     elif call.data == "menu_stats":
