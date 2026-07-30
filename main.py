@@ -250,14 +250,6 @@ def botoes_menu(call):
         ver_meu_perfil(call.message)
         elif call.data == "menu_perfil":
 
-    try:
-        bot.delete_message(
-            call.message.chat.id,
-            call.message.message_id
-        )
-    except:
-        pass
-
     elif call.data == "menu_editar":
         menu_editar(call.message)
 
