@@ -256,11 +256,9 @@ def botoes_menu(call):
         confirmar_deletar(call.message)
 
   elif call: call.data == "menu_cadastro") 
- aabrir_cadastro(call.message)
+ abrir_cadastro(call.message)
 
-    bot.answer_callback_query(call.id)
-
-    iniciar_cadastro(call.message)
+bot.answer_callback_query(call.id)
         # ==========================================================
 # CADASTRO
 # ==========================================================
