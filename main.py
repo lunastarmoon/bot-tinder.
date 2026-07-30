@@ -178,7 +178,7 @@ def start(message):
         "❤️ *Bem-vindo ao Tinder Rp!*\n\n"
         "Aqui você pode conhecer novas pessoas, "
         "curtir perfis e fazer matches.\n\n"
-        "Para começar, crie seu perfil."
+        "Para começar, crie seu perfil." 
         "Se você não for uma conta de rp não faça conta."
     )
 
@@ -250,6 +250,9 @@ def botoes_menu(call):
     elif call.data == "menu_perfil":
         ver_meu_perfil(call.message)
 
+    elif call.data == "menu_cadastro":
+    iniciar_cadastro(call.message)
+
     elif call.data == "menu_editar":
         menu_editar(call.message)
 
@@ -261,9 +264,6 @@ def botoes_menu(call):
 
     elif call.data == "menu_deletar":
         confirmar_deletar(call.message)
-        
-    elif call.data == "menu_criar_perfil":
-        abrir_criar_meu_perfil(call.message) 
 
         # ==========================================================
 # CADASTRO
