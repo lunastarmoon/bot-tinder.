@@ -175,7 +175,7 @@ def enviar_menu(chat_id):
 def start(message):
 
     texto = (
-        "❤️ *Bem-vindo ao Tinder Bot!*\n\n"
+        "❤️ *Bem-vindo ao Tinder Rp!*\n\n"
         "Aqui você pode conhecer novas pessoas, "
         "curtir perfis e fazer matches.\n\n"
         "Para começar, crie seu perfil."
@@ -467,6 +467,55 @@ def salvar_foto(message):
 def ver_meu_perfil(message):
 
     user_id = message.chat.id
+
+    @bot.message_handler(commands=["matches"])
+def comando_matches(message):
+
+    user_id = message.chat.id
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT p.nome
+        FROM perfis p
+        WHERE p.telegram_id IN (
+            SELECT para_id
+            FROM curtidas
+            WHERE de_id = ?
+        )
+        AND p.telegram_id IN (
+            SELECT de_id
+            FROM curtidas
+            WHERE para_id = ?
+        )
+    """, (user_id, user_id))
+
+    matches = cursor.fetchall()
+
+    conn.close()
+
+
+    if not matches:
+
+        bot.send_message(
+            user_id,
+            "💔 Você ainda não tem nenhum match."
+        )
+
+        return
+
+
+    texto = "💌 *Seus Matches:*\n\n"
+
+    for pessoa in matches:
+        texto += f"❤️ {pessoa[0]}\n"
+
+
+    bot.send_message(
+        user_id,
+        texto
+    )
 
     conn = conectar()
     cursor = conn.cursor()
