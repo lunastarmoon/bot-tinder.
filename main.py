@@ -1479,3 +1479,270 @@ def mensagens_sem_funcao(message):
         reply_markup=teclado_menu()
 
     )
+    # ==========================================================
+# MENU PRINCIPAL
+# ==========================================================
+
+@bot.message_handler(commands=["menu"])
+def comando_menu(message):
+
+    enviar_menu(message.chat.id)
+
+
+# ==========================================================
+# MENU ATUALIZADO
+# ==========================================================
+
+def enviar_menu(chat_id):
+
+    markup = InlineKeyboardMarkup(row_width=2)
+
+    markup.add(
+
+        InlineKeyboardButton(
+            "❤️ Tinder",
+            callback_data="menu_tinder"
+        ),
+
+        InlineKeyboardButton(
+            "👤 Meu Perfil",
+            callback_data="menu_perfil"
+        )
+
+    )
+
+
+    markup.add(
+
+        InlineKeyboardButton(
+            "✏️ Editar",
+            callback_data="menu_editar"
+        ),
+
+        InlineKeyboardButton(
+            "💌 Matches",
+            callback_data="menu_matches"
+        )
+
+    )
+
+
+    markup.add(
+
+        InlineKeyboardButton(
+            "📊 Estatísticas",
+            callback_data="menu_stats"
+        ),
+
+        InlineKeyboardButton(
+            "🗑️ Deletar",
+            callback_data="menu_deletar"
+        )
+
+    )
+
+
+    texto = (
+        "🏠 *Menu Principal*\n\n"
+        "Escolha uma opção:\n\n"
+        "❤️ Conheça pessoas\n"
+        "👤 Veja seu perfil\n"
+        "✏️ Atualize suas informações\n"
+        "💌 Confira seus matches"
+    )
+
+
+    bot.send_message(
+
+        chat_id,
+
+        texto,
+
+        reply_markup=markup
+
+    )
+
+
+# ==========================================================
+# NOVOS BOTÕES DO MENU
+# ==========================================================
+
+@bot.callback_query_handler(
+    func=lambda c: c.data.startswith("menu_")
+)
+def botoes_menu(call):
+
+    user_id = call.message.chat.id
+
+
+    bot.answer_callback_query(call.id)
+
+
+    if call.data == "menu_stats":
+
+        estatisticas_perfil(call.message)
+
+
+    elif call.data == "menu_tinder":
+
+        mostrar_proximo_perfil(call.message)
+
+
+    elif call.data == "menu_perfil":
+
+        ver_meu_perfil(call.message)
+
+
+    elif call.data == "menu_editar":
+
+        menu_editar(call.message)
+
+
+    elif call.data == "menu_matches":
+
+        ver_meus_matches(call.message)
+
+
+    elif call.data == "menu_deletar":
+
+        confirmar_deletar(call.message)
+
+
+
+# ==========================================================
+# COMANDO AJUDA MELHORADO
+# ==========================================================
+
+@bot.message_handler(commands=["ajuda"])
+def comando_ajuda(message):
+
+    texto = (
+        "📖 *Ajuda do Bot*\n\n"
+
+        "❤️ /tinder - Ver perfis\n"
+        "👤 /perfil - Seu perfil\n"
+        "✏️ /editar - Editar informações\n"
+        "💌 /matches - Seus matches\n"
+        "📊 /stats - Estatísticas\n"
+        "🗑️ /deletar - Apagar perfil\n"
+        "🏠 /menu - Menu principal\n\n"
+
+        "Boa sorte nos matches! ❤️"
+    )
+
+
+    bot.send_message(
+        message.chat.id,
+        texto
+)
+    # ==========================================================
+# LIMPEZA DE DADOS TEMPORÁRIOS
+# ==========================================================
+
+def limpar_dados_temporarios():
+
+    dados_cadastro.clear()
+    dados_edicao.clear()
+
+
+# ==========================================================
+# COMANDO REINICIAR MENU
+# ==========================================================
+
+@bot.message_handler(commands=["cancelar"])
+def cancelar_operacao(message):
+
+    user_id = message.chat.id
+
+    if user_id in dados_cadastro:
+        del dados_cadastro[user_id]
+
+    if user_id in dados_edicao:
+        del dados_edicao[user_id]
+
+
+    bot.send_message(
+        user_id,
+        "❌ Operação cancelada.",
+        reply_markup=teclado_menu()
+    )
+
+
+# ==========================================================
+# BOTÃO CANCELAR
+# ==========================================================
+
+@bot.callback_query_handler(
+    func=lambda c: c.data == "cancelar"
+)
+def cancelar_botao(call):
+
+    user_id = call.message.chat.id
+
+    if user_id in dados_cadastro:
+        del dados_cadastro[user_id]
+
+    if user_id in dados_edicao:
+        del dados_edicao[user_id]
+
+
+    bot.answer_callback_query(
+        call.id,
+        "Cancelado"
+    )
+
+
+    enviar_menu(user_id)
+
+
+# ==========================================================
+# MENSAGEM DE STATUS
+# ==========================================================
+
+@bot.message_handler(commands=["status"])
+def status_bot(message):
+
+    bot.send_message(
+        message.chat.id,
+        "✅ Bot online e funcionando!"
+    )
+
+
+# ==========================================================
+# FUNÇÃO DE SEGURANÇA DO POLLING
+# ==========================================================
+
+def iniciar_bot():
+
+    while True:
+
+        try:
+
+            print("🤖 Bot iniciado!")
+
+            bot.infinity_polling(
+                timeout=60,
+                long_polling_timeout=60
+            )
+
+
+        except Exception as erro:
+
+            print(
+                f"Erro no bot: {erro}"
+            )
+
+            limpar_dados_temporarios()
+
+    # ==========================================================
+# INICIAR BOT
+# ==========================================================
+
+if __name__ == "__main__":
+
+    print("===================================")
+    print("❤️ Tinder Bot iniciado com sucesso!")
+    print("🤖 Aguardando mensagens...")
+    print("===================================")
+
+    iniciar_bot()
