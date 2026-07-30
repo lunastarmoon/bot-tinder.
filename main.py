@@ -466,7 +466,7 @@ def salvar_foto(message):
 
 @bot.message_handler(commands=["perfil"])
 def ver_meu_perfil(message):
-
+    
     user_id = message.chat.id
 
     conn = conectar()
@@ -545,6 +545,57 @@ def ver_meu_perfil(message):
         foto,
         caption=legenda,
         reply_markup=markup
+    )
+
+# ==========================================================
+# VER MATCHES
+# ==========================================================
+
+@bot.message_handler(commands=["matches"])
+def ver_matches(message):
+
+    user_id = message.chat.id
+
+    conn = conectar_bd()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT p.nome, p.telegram_id
+        FROM perfis p
+        WHERE p.telegram_id IN (
+            SELECT para_id
+            FROM curtidas
+            WHERE de_id = ?
+        )
+        AND p.telegram_id IN (
+            SELECT de_id
+            FROM curtidas
+            WHERE para_id = ?
+        )
+    """, (user_id, user_id))
+
+    matches = cursor.fetchall()
+
+    conn.close()
+
+
+    if not matches:
+        bot.send_message(
+            user_id,
+            "💔 Você ainda não tem nenhum match."
+        )
+        return
+
+
+    texto = "💌 Seus Matches:\n\n"
+
+    for nome, id_pessoa in matches:
+        texto += f"❤️ {nome}\n"
+
+
+    bot.send_message(
+        user_id,
+        texto
     )
 
 # ==========================================================
