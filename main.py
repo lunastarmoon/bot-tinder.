@@ -175,16 +175,15 @@ def enviar_menu(chat_id):
 def start(message):
 
     texto = (
-        "❤️ Bem-vindo ao Tinder Rp!\n\n"
+        "❤️ Bem-vindo ao Tinder Bot!\n\n"
         "Crie seu perfil, veja pessoas e encontre matches."
-        "Só para contas de rpg."
     )
 
     bot.send_message(
         message.chat.id,
         texto,
         reply_markup=teclado_menu()
-)
+    )
 
 # ==========================================================
 # AJUDA
