@@ -446,20 +446,22 @@ def salvar_foto(message):
 
     cursor.execute("""
         INSERT INTO perfis(
-            telegram_id,
-            nome,
-            idade,
-            bio,
-            foto
-        )
-        VALUES (?, ?, ?, ?, ?)
+    telegram_id,
+    nome,
+    idade,
+    bio,
+    foto,
+    username
+)
+VALUES (?, ?, ?, ?, ?, ?)
     """, (
-        user_id,
-        dados_cadastro[user_id]["nome"],
-        dados_cadastro[user_id]["idade"],
-        dados_cadastro[user_id]["bio"],
-        foto
-    ))
+    user_id,
+    dados_cadastro[user_id]["nome"],
+    dados_cadastro[user_id]["idade"],
+    dados_cadastro[user_id]["bio"],
+    foto,
+    message.from_user.username
+        )
 
     conn.commit()
     conn.close()
