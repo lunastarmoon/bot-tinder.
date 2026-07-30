@@ -114,7 +114,7 @@ def teclado_menu():
             callback_data="menu_tinder"
         ),
         InlineKeyboardButton(
-            "👤 Perfil",
+            "👤 Meu Perfil",
             callback_data="menu_perfil"
         )
     )
@@ -248,8 +248,7 @@ def botoes_menu(call):
 
     elif call.data == "menu_perfil":
         ver_meu_perfil(call.message)
-        elif call.data == "menu_perfil":
-
+        
     elif call.data == "menu_editar":
         menu_editar(call.message)
 
