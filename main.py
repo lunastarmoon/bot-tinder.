@@ -273,7 +273,9 @@ def botoes_menu(call):
             "❤️ Tinder - veja perfis\n"
             "👤 Meu Perfil - veja seus dados\n"
             "💌 Matches - veja seus matches"
+            
             "✏️ Editar Perfil - edite seu perfil"
+            
             "🗑 Excluir Perfim - exlcua seu perfil todo"
         )
 
