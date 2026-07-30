@@ -1,165 +1,436 @@
 import os
 import sqlite3
 import threading
-import telebot
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from http.server import BaseHTTPRequestHandler, HTTPServer
 
-# --- SERVIDOR HTTP FALSO PARA O RENDER ---
-class ServidorFalso(BaseHTTPRequestHandler):
+import telebot
+from telebot.types import (
+    InlineKeyboardMarkup,
+    InlineKeyboardButton
+)
+
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+# ==========================================================
+# CONFIGURAÇÕES
+# ==========================================================
+
+TOKEN = '8733102844:AAEghsGpIFHS-DwJOVj-dajo6sYUIA7DjF0'
+
+bot = telebot.TeleBot(TOKEN, parse_mode="Markdown")
+
+DB_NAME = "tinder.db"
+
+dados_cadastro = {}
+dados_edicao = {}
+
+# ==========================================================
+# SERVIDOR HTTP (RENDER)
+# ==========================================================
+
+class ServidorHTTP(BaseHTTPRequestHandler):
+
     def do_GET(self):
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
-        self.wfile.write(b"Bot Tinder rodando 24h!")
+        self.wfile.write(b"Bot Tinder Online!")
 
-def rodar_servidor_falso():
+def iniciar_servidor():
+
     porta = int(os.environ.get("PORT", 10000))
-    server = HTTPServer(("0.0.0.0", porta), ServidorFalso)
-    server.serve_forever()
 
-threading.Thread(target=rodar_servidor_falso, daemon=True).start()
+    servidor = HTTPServer(
+        ("0.0.0.0", porta),
+        ServidorHTTP
+    )
 
-# --- CONEXÃO DO BOT TELEGRAM ---
-API_TOKEN = '8733102844:AAEy0gBNTkmpJ60LyRSQUKjfWHQFGm9XQLw'
-bot = telebot.TeleBot(API_TOKEN)
+    servidor.serve_forever()
 
-dados_cadastro = {}
+threading.Thread(
+    target=iniciar_servidor,
+    daemon=True
+).start()
 
-# ----------------- BANCO DE DADOS -----------------
+# ==========================================================
+# BANCO DE DADOS
+# ==========================================================
 
-def conectar_bd():
-    return sqlite3.connect("tinder.db")
+def conectar():
 
-def iniciar_bd():
-    conn = conectar_bd()
+    return sqlite3.connect(DB_NAME)
+
+def iniciar_banco():
+
+    conn = conectar()
+
     cursor = conn.cursor()
 
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS perfis (
+        CREATE TABLE IF NOT EXISTS perfis(
+
             telegram_id INTEGER PRIMARY KEY,
+
             nome TEXT,
-            idade TEXT,
+
+            idade INTEGER,
+
             bio TEXT,
+
             foto TEXT,
-            procura TEXT
+
+            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
         )
     """)
 
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS curtidas (
+        CREATE TABLE IF NOT EXISTS curtidas(
+
             de_id INTEGER,
+
             para_id INTEGER,
-            PRIMARY KEY (de_id, para_id)
+
+            PRIMARY KEY(de_id, para_id)
+
         )
     """)
 
     conn.commit()
     conn.close()
 
-iniciar_bd()
+iniciar_banco()
 
-# ----------------- CADASTRO -----------------
+# ==========================================================
+# TECLADOS
+# ==========================================================
 
-@bot.message_handler(commands=["cadastro"])
-def iniciar_cadastro(message):
-    user_id = message.chat.id
-    dados_cadastro[user_id] = {}
+def teclado_menu():
 
-    bot.send_message(user_id, "Qual é o seu **Nome**?")
-    bot.register_next_step_handler(message, salvar_nome)
+    markup = InlineKeyboardMarkup(row_width=2)
 
-def salvar_nome(message):
-    user_id = message.chat.id
+    markup.add(
+        InlineKeyboardButton(
+            "❤️ Tinder",
+            callback_data="menu_tinder"
+        ),
+        InlineKeyboardButton(
+            "👤 Meu Perfil",
+            callback_data="menu_perfil"
+        )
+    )
 
-    if user_id not in dados_cadastro:
-        return
+    markup.add(
+        InlineKeyboardButton(
+            "💌 Matches",
+            callback_data="menu_matches"
+        ),
+        InlineKeyboardButton(
+            "✏️ Editar Perfil",
+            callback_data="menu_editar"
+        )
+    )
 
-    dados_cadastro[user_id]["nome"] = message.text
+    markup.add(
+        InlineKeyboardButton(
+            "📝 Criar Perfil",
+            callback_data="menu_cadastro"
+        ),
+        InlineKeyboardButton(
+            "🗑 Excluir Perfil",
+            callback_data="menu_deletar"
+        )
+    )
 
-    bot.send_message(user_id, "Qual é a sua **Idade**?")
-    bot.register_next_step_handler(message, salvar_idade)
+    markup.add(
+        InlineKeyboardButton(
+            "❓ Ajuda",
+            callback_data="menu_ajuda"
+        )
+    )
 
-def salvar_idade(message):
-    user_id = message.chat.id
+    return markup
 
-    if user_id not in dados_cadastro:
-        return
+# ==========================================================
+# MENU PRINCIPAL
+# ==========================================================
 
-    dados_cadastro[user_id]["idade"] = message.text
+def enviar_menu(chat_id):
 
-    markup = InlineKeyboardMarkup()
+    bot.send_message(
 
-    markup.row(
-        InlineKeyboardButton("Amizade 🤝", callback_data="proc_Amizade"),
-        InlineKeyboardButton("Ficante 🔥", callback_data="proc_Ficante"),
-        InlineKeyboardButton("Namoro ❤️", callback_data="proc_Namoro"),
+        chat_id,
+
+        "🏠 *Menu Principal*\n\n"
+        "Escolha uma opção abaixo.",
+
+        reply_markup=teclado_menu()
+
+    )
+
+# ==========================================================
+# START
+# ==========================================================
+
+@bot.message_handler(commands=["start"])
+def start(message):
+
+    texto = (
+        "❤️ *Bem-vindo ao Tinder Bot!*\n\n"
+        "Aqui você pode conhecer novas pessoas, "
+        "curtir perfis e fazer matches.\n\n"
+        "Para começar, crie seu perfil."
     )
 
     bot.send_message(
-        user_id,
-        "O que você procura?",
-        reply_markup=markup
+
+        message.chat.id,
+
+        texto,
+
+        reply_markup=teclado_menu()
+
     )
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith("proc_"))
-def salvar_procura(call):
-    user_id = call.message.chat.id
+# ==========================================================
+# AJUDA
+# ==========================================================
 
-    if user_id not in dados_cadastro:
+@bot.message_handler(commands=["ajuda"])
+def ajuda(message):
+
+    texto = (
+        "*📖 Comandos disponíveis*\n\n"
+
+        "/start - Menu principal\n"
+
+        "/cadastro - Criar perfil\n"
+
+        "/perfil - Ver seu perfil\n"
+
+        "/editar - Editar perfil\n"
+
+        "/tinder - Ver pessoas\n"
+
+        "/matches - Ver matches\n"
+
+        "/deletar - Excluir perfil\n"
+
+        "/ajuda - Mostrar ajuda"
+    )
+
+    bot.send_message(message.chat.id, texto)
+
+# ==========================================================
+# CALLBACK DO MENU
+# ==========================================================
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("menu_"))
+def callback_menu(call):
+
+    bot.answer_callback_query(call.id)
+
+    if call.data == "menu_cadastro":
+        iniciar_cadastro(call.message)
+
+    elif call.data == "menu_tinder":
+        mostrar_proximo_perfil(call.message)
+
+    elif call.data == "menu_perfil":
+        ver_meu_perfil(call.message)
+
+    elif call.data == "menu_editar":
+        menu_editar(call.message)
+
+    elif call.data == "menu_matches":
+        ver_meus_matches(call.message)
+
+    elif call.data == "menu_deletar":
+        confirmar_saida(call.message)
+
+    elif call.data == "menu_ajuda":
+        ajuda(call.message)
+        # ==========================================================
+# CADASTRO
+# ==========================================================
+
+@bot.message_handler(commands=["cadastro"])
+def iniciar_cadastro(message):
+
+    user_id = message.chat.id
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT telegram_id FROM perfis WHERE telegram_id = ?",
+        (user_id,)
+    )
+
+    existe = cursor.fetchone()
+    conn.close()
+
+    if existe:
+
+        bot.send_message(
+            user_id,
+            "⚠️ Você já possui um perfil.\n\nUse /editar para alterá-lo."
+        )
         return
 
-    dados_cadastro[user_id]["procura"] = call.data.split("_")[1]
+    dados_cadastro[user_id] = {}
 
-    bot.edit_message_reply_markup(
+    msg = bot.send_message(
         user_id,
-        call.message.message_id,
-        reply_markup=None
+        "👤 Qual é o seu nome?"
     )
 
-    bot.send_message(user_id, "Digite sua **Bio**:")
+    bot.register_next_step_handler(msg, salvar_nome)
 
-    bot.register_next_step_handler(call.message, salvar_bio)
 
-def salvar_bio(message):
+# ----------------------------------------------------------
+
+def salvar_nome(message):
+
     user_id = message.chat.id
 
     if user_id not in dados_cadastro:
         return
 
-    dados_cadastro[user_id]["bio"] = message.text
+    nome = message.text.strip()
 
-    bot.send_message(user_id, "Agora envie sua **foto de perfil**.")
+    if len(nome) < 2:
 
-    bot.register_next_step_handler(message, salvar_foto)
+        msg = bot.send_message(
+            user_id,
+            "❌ Digite um nome válido."
+        )
+
+        bot.register_next_step_handler(msg, salvar_nome)
+        return
+
+    dados_cadastro[user_id]["nome"] = nome
+
+    msg = bot.send_message(
+        user_id,
+        "🎂 Qual é a sua idade?"
+    )
+
+    bot.register_next_step_handler(msg, salvar_idade)
+
+
+# ----------------------------------------------------------
+
+def salvar_idade(message):
+
+    user_id = message.chat.id
+
+    if user_id not in dados_cadastro:
+        return
+
+    try:
+
+        idade = int(message.text)
+
+    except ValueError:
+
+        msg = bot.send_message(
+            user_id,
+            "❌ Digite apenas números."
+        )
+
+        bot.register_next_step_handler(msg, salvar_idade)
+        return
+
+    if idade < 19:
+
+        bot.send_message(
+            user_id,
+            "🚫 Este bot é permitido apenas para maiores de 19 anos."
+        )
+
+        del dados_cadastro[user_id]
+        return
+
+    dados_cadastro[user_id]["idade"] = idade
+
+    msg = bot.send_message(
+        user_id,
+        "📝 Escreva uma bio sobre você."
+    )
+
+    bot.register_next_step_handler(msg, salvar_bio)
+
+
+# ----------------------------------------------------------
+
+def salvar_bio(message):
+
+    user_id = message.chat.id
+
+    if user_id not in dados_cadastro:
+        return
+
+    bio = message.text.strip()
+
+    if len(bio) < 5:
+
+        msg = bot.send_message(
+            user_id,
+            "❌ Escreva uma bio um pouco maior."
+        )
+
+        bot.register_next_step_handler(msg, salvar_bio)
+        return
+
+    dados_cadastro[user_id]["bio"] = bio
+
+    msg = bot.send_message(
+        user_id,
+        "📸 Agora envie sua foto de perfil."
+    )
+
+    bot.register_next_step_handler(msg, salvar_foto)
+
+
+# ----------------------------------------------------------
 
 def salvar_foto(message):
+
     user_id = message.chat.id
 
     if user_id not in dados_cadastro:
         return
 
     if message.content_type != "photo":
-        bot.send_message(user_id, "❌ Envie uma foto válida.")
-        bot.register_next_step_handler(message, salvar_foto)
+
+        msg = bot.send_message(
+            user_id,
+            "❌ Envie uma foto."
+        )
+
+        bot.register_next_step_handler(msg, salvar_foto)
         return
 
     foto = message.photo[-1].file_id
 
-    conn = conectar_bd()
+    conn = conectar()
     cursor = conn.cursor()
 
     cursor.execute("""
-        INSERT OR REPLACE INTO perfis
-        (telegram_id, nome, idade, bio, foto, procura)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO perfis(
+            telegram_id,
+            nome,
+            idade,
+            bio,
+            foto
+        )
+        VALUES (?, ?, ?, ?, ?)
     """, (
         user_id,
         dados_cadastro[user_id]["nome"],
         dados_cadastro[user_id]["idade"],
         dados_cadastro[user_id]["bio"],
-        foto,
-        dados_cadastro[user_id]["procura"]
+        foto
     ))
 
     conn.commit()
@@ -169,366 +440,317 @@ def salvar_foto(message):
 
     bot.send_message(
         user_id,
-        "🎉 Perfil criado! Use /tinder."
+        "✅ Perfil criado com sucesso!"
     )
 
-# ----------------- EDITAR PERFIL -----------------
+    enviar_menu(user_id)
+    # ==========================================================
+# VER MEU PERFIL
+# ==========================================================
 
-@bot.message_handler(commands=["editar"])
-def menu_editar(message):
+@bot.message_handler(commands=["perfil"])
+def ver_meu_perfil(message):
+
     user_id = message.chat.id
 
-    conn = conectar_bd()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        "SELECT 1 FROM perfis WHERE telegram_id=?",
-        (user_id,)
-    )
-
-    existe = cursor.fetchone()
-
-    conn.close()
-
-    if not existe:
-        bot.send_message(
-            user_id,
-            "Crie um perfil primeiro usando /cadastro."
-        )
-        return
-
-    markup = InlineKeyboardMarkup()
-
-    markup.row(
-        InlineKeyboardButton("Idade 🎂", callback_data="edit_idade"),
-        InlineKeyboardButton("Bio 📝", callback_data="edit_bio")
-    )
-
-    markup.row(
-        InlineKeyboardButton("Foto 📸", callback_data="edit_foto"),
-        InlineKeyboardButton("Objetivo 🎯", callback_data="edit_proc")
-    )
-
-    bot.send_message(
-        user_id,
-        "Escolha o que deseja editar:",
-        reply_markup=markup
-    )
-# ----------------- VER MATCHS -----------------
-
-@bot.message_handler(commands=["matches", "matchs"])
-def ver_meus_matches(message):
-    my_id = message.chat.id
-
-    conn = conectar_bd()
+    conn = conectar()
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT p.nome, p.telegram_id
-        FROM perfis p
-        WHERE p.telegram_id IN (
-            SELECT para_id
-            FROM curtidas
-            WHERE de_id = ?
-        )
-        AND p.telegram_id IN (
-            SELECT de_id
-            FROM curtidas
-            WHERE para_id = ?
-        )
-    """, (my_id, my_id))
-
-    lista_matches = cursor.fetchall()
-
-    conn.close()
-
-    if lista_matches:
-        texto = "💌 Seus Matches Atuais:\n\n"
-
-        for nome_match, id_match in lista_matches:
-            texto += f"• {nome_match} - Conversar no Privado\n"
-
-        bot.send_message(
-            my_id,
-            texto,
-            parse_mode="Markdown"
-        )
-
-    else:
-        bot.send_message(
-            my_id,
-            "💔 Você ainda não tem nenhum Match.\n\nContinue avaliando no /tinder!"
-        )
-
-
-# ----------------- FLUXO DO TINDER -----------------
-
-@bot.message_handler(commands=["start", "tinder"])
-def mostrar_proximo_perfil(message):
-    my_id = message.chat.id
-
-    conn = conectar_bd()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        "SELECT 1 FROM perfis WHERE telegram_id = ?",
-        (my_id,)
-    )
-
-    if not cursor.fetchone():
-        conn.close()
-
-        bot.send_message(
-            my_id,
-            "⚠️ Você precisa criar um perfil primeiro!\nUse /cadastro.",
-            parse_mode="Markdown"
-        )
-        return
-
-    cursor.execute("""
-        SELECT telegram_id,
-               nome,
-               idade,
-               bio,
-               foto,
-               procura
+        SELECT nome, idade, bio, foto
         FROM perfis
-        WHERE telegram_id != ?
-        AND telegram_id NOT IN (
-            SELECT para_id
-            FROM curtidas
-            WHERE de_id = ?
-        )
-        LIMIT 1
-    """, (my_id, my_id))
+        WHERE telegram_id = ?
+    """, (user_id,))
 
     perfil = cursor.fetchone()
 
     conn.close()
 
-    if perfil:
-
-        perfil_id, nome, idade, bio, foto, procura = perfil
-
-        markup = InlineKeyboardMarkup()
-
-        markup.row(
-            InlineKeyboardButton(
-                "❌ Próximo",
-                callback_data=f"prox_{perfil_id}"
-            ),
-            InlineKeyboardButton(
-                "❤️ Curtir",
-                callback_data=f"curt_{perfil_id}"
-            )
-        )
-
-        bot.send_photo(
-            my_id,
-            foto,
-            caption=(
-                f"{nome}, {idade} anos\n"
-                f"🎯 Procura por: {procura}\n\n"
-                f"{bio}"
-            ),
-            reply_markup=markup,
-            parse_mode="Markdown"
-        )
-
-    else:
-        bot.send_message(
-            my_id,
-            "🌟 Você já viu todos os perfis cadastrados no momento!"
-    )
-        # ----------------- TRATAMENTO DOS BOTÕES -----------------
-
-@bot.callback_query_handler(
-    func=lambda call: call.data.startswith(
-        ("curt_", "prox_", "confirmar_", "cancelar_")
-    )
-)
-def tratar_botoes(call):
-    my_id = call.message.chat.id
-
-    # --------- APAGAR PERFIL ---------
-
-    if call.data == "confirmar_deletar":
-
-        bot.edit_message_reply_markup(
-            my_id,
-            call.message.message_id,
-            reply_markup=None
-        )
-
-        conn = conectar_bd()
-        cursor = conn.cursor()
-
-        cursor.execute(
-            "DELETE FROM perfis WHERE telegram_id = ?",
-            (my_id,)
-        )
-
-        cursor.execute(
-            "DELETE FROM curtidas WHERE de_id = ? OR para_id = ?",
-            (my_id, my_id)
-        )
-
-        conn.commit()
-        conn.close()
-
-        bot.answer_callback_query(
-            call.id,
-            "Perfil deletado!",
-            show_alert=True
-        )
+    if not perfil:
 
         bot.send_message(
-            my_id,
-            "❌ Seu perfil foi removido com sucesso."
+            user_id,
+            "❌ Você ainda não possui um perfil.\n\nUse /cadastro."
         )
-
         return
 
-    elif call.data == "cancelar_deletar":
+    nome, idade, bio, foto = perfil
 
-        bot.edit_message_reply_markup(
-            my_id,
-            call.message.message_id,
-            reply_markup=None
-        )
+    conn = conectar()
+    cursor = conn.cursor()
 
-        bot.answer_callback_query(
-            call.id,
-            "Operação cancelada 😉"
-        )
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM curtidas
+        WHERE para_id = ?
+    """, (user_id,))
 
-        return
+    curtidas = cursor.fetchone()[0]
 
-    # --------- CURTIR PERFIL ---------
-
-    elif call.data.startswith("curt_"):
-
-        alvo_id = int(call.data.split("_")[1])
-
-        conn = conectar_bd()
-        cursor = conn.cursor()
-
-        try:
-            cursor.execute(
-                "INSERT INTO curtidas VALUES (?, ?)",
-                (my_id, alvo_id)
-            )
-            conn.commit()
-
-        except sqlite3.IntegrityError:
-            pass
-
-        cursor.execute(
-            """
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM curtidas c1
+        WHERE c1.de_id = ?
+        AND EXISTS(
             SELECT 1
-            FROM curtidas
-            WHERE de_id = ?
-            AND para_id = ?
-            """,
-            (alvo_id, my_id)
+            FROM curtidas c2
+            WHERE c2.de_id = c1.para_id
+            AND c2.para_id = ?
         )
+    """, (user_id, user_id))
 
-        match = cursor.fetchone()
+    matches = cursor.fetchone()[0]
 
-        cursor.execute(
-            "SELECT nome FROM perfis WHERE telegram_id = ?",
-            (my_id,)
+    conn.close()
+
+    markup = InlineKeyboardMarkup(row_width=2)
+
+    markup.add(
+        InlineKeyboardButton(
+            "✏️ Editar Perfil",
+            callback_data="menu_editar"
+        ),
+        InlineKeyboardButton(
+            "🏠 Menu",
+            callback_data="menu_inicio"
         )
+    )
 
-        resultado = cursor.fetchone()
+    legenda = (
+        f"👤 *{nome}*\n"
+        f"🎂 {idade} anos\n\n"
+        f"📝 {bio}\n\n"
+        f"❤️ Curtidas: {curtidas}\n"
+        f"💌 Matches: {matches}"
+    )
 
-        meu_nome = resultado[0] if resultado else "Alguém"
+    bot.send_photo(
+        user_id,
+        foto,
+        caption=legenda,
+        reply_markup=markup
+    )
 
-        conn.close()
+# ==========================================================
+# MENU EDITAR
+# ==========================================================
 
-        bot.edit_message_reply_markup(
-            my_id,
-            call.message.message_id,
-            reply_markup=None
-        )
-
-        if match:
-
-            bot.answer_callback_query(
-                call.id,
-                "😍 É UM MATCH!",
-                show_alert=True
-            )
-
-            bot.send_message(
-                my_id,
-                "🎉 Vocês se curtiram!\nUse /matches."
-            )
-
-            try:
-                bot.send_message(
-                    alvo_id,
-                    f"🎉 Você deu MATCH com {meu_nome}!\nUse /matches."
-                )
-            except Exception:
-                pass
-
-        else:
-
-            bot.answer_callback_query(
-                call.id,
-                "❤️ Curtido!"
-            )
-
-        mostrar_proximo_perfil(call.message)
-
-    # --------- PRÓXIMO PERFIL ---------
-
-    elif call.data.startswith("prox_"):
-
-        bot.edit_message_reply_markup(
-            my_id,
-            call.message.message_id,
-            reply_markup=None
-        )
-
-        bot.answer_callback_query(
-            call.id,
-            "➡️ Próximo perfil"
-        )
-
-        mostrar_proximo_perfil(call.message)
-
-
-# ----------------- DELETAR PERFIL -----------------
-
-@bot.message_handler(commands=["sair", "deletar"])
-def confirmar_saida(message):
+@bot.message_handler(commands=["editar"])
+def menu_editar(message):
 
     user_id = message.chat.id
 
-    markup = InlineKeyboardMarkup()
+    conn = conectar()
+    cursor = conn.cursor()
 
-    markup.row(
+    cursor.execute(
+        "SELECT telegram_id FROM perfis WHERE telegram_id=?",
+        (user_id,)
+    )
+
+    if not cursor.fetchone():
+
+        conn.close()
+
+        bot.send_message(
+            user_id,
+            "❌ Você ainda não possui um perfil."
+        )
+
+        return
+
+    conn.close()
+
+    markup = InlineKeyboardMarkup(row_width=2)
+
+    markup.add(
         InlineKeyboardButton(
-            "✅ Sim, apagar tudo",
-            callback_data="confirmar_deletar"
+            "👤 Nome",
+            callback_data="editar_nome"
         ),
         InlineKeyboardButton(
-            "❌ Não",
-            callback_data="cancelar_deletar"
+            "🎂 Idade",
+            callback_data="editar_idade"
+        )
+    )
+
+    markup.add(
+        InlineKeyboardButton(
+            "📝 Bio",
+            callback_data="editar_bio"
+        ),
+        InlineKeyboardButton(
+            "📸 Foto",
+            callback_data="editar_foto"
+        )
+    )
+
+    markup.add(
+        InlineKeyboardButton(
+            "🏠 Menu",
+            callback_data="menu_inicio"
         )
     )
 
     bot.send_message(
         user_id,
-        "⚠️ Tem certeza que deseja apagar seu perfil?",
+        "✏️ Escolha o que deseja editar:",
         reply_markup=markup
     )
 
+# ==========================================================
+# CALLBACK EDITAR
+# ==========================================================
 
-# ----------------- INICIAR BOT -----------------
+@bot.callback_query_handler(func=lambda c: c.data.startswith("editar_"))
+def callback_editar(call):
 
-print("Bot iniciado com sucesso!")
+    user_id = call.message.chat.id
 
-bot.infinity_polling(skip_pending=True)
+    if call.data == "editar_nome":
+
+        dados_edicao[user_id] = "nome"
+
+        msg = bot.send_message(
+            user_id,
+            "👤 Digite o novo nome:"
+        )
+
+        bot.register_next_step_handler(
+            msg,
+            salvar_edicao
+        )
+
+    elif call.data == "editar_idade":
+
+        dados_edicao[user_id] = "idade"
+
+        msg = bot.send_message(
+            user_id,
+            "🎂 Digite a nova idade:"
+        )
+
+        bot.register_next_step_handler(
+            msg,
+            salvar_edicao
+        )
+
+    elif call.data == "editar_bio":
+
+        dados_edicao[user_id] = "bio"
+
+        msg = bot.send_message(
+            user_id,
+            "📝 Digite a nova bio:"
+        )
+
+        bot.register_next_step_handler(
+            msg,
+            salvar_edicao
+        )
+
+    elif call.data == "editar_foto":
+
+        dados_edicao[user_id] = "foto"
+
+        msg = bot.send_message(
+            user_id,
+            "📸 Envie a nova foto:"
+        )
+
+        bot.register_next_step_handler(
+            msg,
+            salvar_edicao_foto
+        )
+
+# ==========================================================
+# SALVAR EDIÇÕES
+# ==========================================================
+
+def salvar_edicao(message):
+
+    user_id = message.chat.id
+
+    if user_id not in dados_edicao:
+        return
+
+    campo = dados_edicao[user_id]
+
+    valor = message.text
+
+    if campo == "idade":
+
+        try:
+
+            idade = int(valor)
+
+        except:
+
+            bot.send_message(
+                user_id,
+                "❌ Digite apenas números."
+            )
+            return
+
+        if idade < 19:
+
+            bot.send_message(
+                user_id,
+                "❌ A idade mínima é 19 anos."
+            )
+            return
+
+        valor = idade
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        f"UPDATE perfis SET {campo}=? WHERE telegram_id=?",
+        (valor, user_id)
+    )
+
+    conn.commit()
+    conn.close()
+
+    del dados_edicao[user_id]
+
+    bot.send_message(
+        user_id,
+        "✅ Perfil atualizado com sucesso!"
+    )
+
+def salvar_edicao_foto(message):
+
+    user_id = message.chat.id
+
+    if user_id not in dados_edicao:
+        return
+
+    if message.content_type != "photo":
+
+        bot.send_message(
+            user_id,
+            "❌ Envie uma foto."
+        )
+        return
+
+    foto = message.photo[-1].file_id
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "UPDATE perfis SET foto=? WHERE telegram_id=?",
+        (foto, user_id)
+    )
+
+    conn.commit()
+    conn.close()
+
+    del dados_edicao[user_id]
+
+    bot.send_message(
+        user_id,
+        "✅ Foto atualizada!"
+    )
