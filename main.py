@@ -542,7 +542,7 @@ def ver_meu_perfil(message):
     cursor.execute("""
         SELECT COUNT(*)
         FROM curtidas
-        WHERE para_id = ?
+        WHERE para_id = %s
     """, (user_id,))
 
     curtidas = cursor.fetchone()[0]
@@ -550,12 +550,12 @@ def ver_meu_perfil(message):
     cursor.execute("""
         SELECT COUNT(*)
         FROM curtidas c1
-        WHERE c1.de_id = ?
+        WHERE c1.de_id = %s
         AND EXISTS(
             SELECT 1
             FROM curtidas c2
             WHERE c2.de_id = c1.para_id
-            AND c2.para_id = ?
+            AND c2.para_id = %s
         )
     """, (user_id, user_id))
 
