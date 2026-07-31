@@ -1105,7 +1105,7 @@ def curtir_perfil(call):
 
     # Mostra outro perfil
     mostrar_proximo_perfil(call.message)
-    # ==========================================================
+# ==========================================================
 # VER MATCHES
 # ==========================================================
 
@@ -1118,8 +1118,8 @@ def ver_meus_matches(message):
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT p.nome, p.username
-    FROM perfis p
+        SELECT p.nome, p.username
+        FROM perfis p
 
         WHERE p.telegram_id IN (
 
@@ -1138,11 +1138,14 @@ def ver_meus_matches(message):
         )
 
         ORDER BY p.nome
+
     """, (user_id, user_id))
+
 
     matches = cursor.fetchall()
 
     conn.close()
+
 
     if not matches:
 
@@ -1152,19 +1155,26 @@ def ver_meus_matches(message):
         )
         return
 
+
     texto = "💌 *Seus Matches*\n\n"
 
-for pessoa in matches:
 
-    nome = pessoa[0]
-    username = pessoa[1]
+    for pessoa in matches:
 
-    if username:
-        texto += f"❤️ {nome} (@{username})\n"
-    else:
-        texto += f"❤️ {nome}\n"
+        nome = pessoa[0]
+        username = pessoa[1]
+
+        if username:
+
+            texto += f"❤️ {nome} (@{username})\n"
+
+        else:
+
+            texto += f"❤️ {nome}\n"
+
 
     markup = InlineKeyboardMarkup(row_width=2)
+
 
     markup.add(
 
@@ -1180,12 +1190,12 @@ for pessoa in matches:
 
     )
 
+
     bot.send_message(
         user_id,
         texto,
         reply_markup=markup
-    )
-
+        )
 
 # ==========================================================
 # BOTÕES DO MATCH
