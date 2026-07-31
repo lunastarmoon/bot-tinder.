@@ -1154,7 +1154,7 @@ def ver_meus_matches(message):
 
     texto = "💌 *Seus Matches*\n\n"
 
-    for pessoa in matches:
+for pessoa in matches:
 
     nome = pessoa[0]
     username = pessoa[1]
