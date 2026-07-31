@@ -441,6 +441,8 @@ def salvar_foto(message):
 
     foto = message.photo[-1].file_id
 
+    bot.send_message(user_id, "📸 Foto recebida, salvando...")
+
     conn = conectar()
     cursor = conn.cursor()
 
