@@ -16,6 +16,8 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 
 TOKEN = os.getenv('8733102844:AAF0Eif5ogzAqFcna5Z3xOv57yC8F-PXx-Y')
 
+print("TOKEN carregado?", TOKEN is not None)
+
 bot = telebot.TeleBot(TOKEN, parse_mode="Markdown")
 
 DB_NAME = "tinder.db"
