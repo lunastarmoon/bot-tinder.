@@ -473,7 +473,7 @@ def salvar_foto(message):
                 foto,
                 username
             )
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s)
         """, (
             user_id,
             dados_cadastro[user_id]["nome"],
