@@ -609,7 +609,7 @@ def ver_matches(message):
         WHERE p.telegram_id IN (
             SELECT para_id
             FROM curtidas
-            WHERE de_id = ?
+            WHERE de_id = %s
         )
         AND p.telegram_id IN (
             SELECT de_id
