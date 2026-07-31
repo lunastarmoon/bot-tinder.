@@ -60,8 +60,9 @@ threading.Thread(
 
 def conectar():
 
-    return sqlite3.connect(DB_NAME)
-
+    return psycopg2.connect(
+        os.getenv("DATABASE_URL")
+    )
 def iniciar_banco():
 
     conn = conectar()
