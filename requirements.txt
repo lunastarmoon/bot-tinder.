@@ -1,2 +1,3 @@
 pyTelegramBotAPI
 telebot-calendar
+psycopg2-binary
