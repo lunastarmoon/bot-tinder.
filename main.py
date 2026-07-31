@@ -852,7 +852,7 @@ def salvar_edicao_foto(message):
     cursor = conn.cursor()
 
     cursor.execute(
-        "UPDATE perfis SET foto=? WHERE telegram_id=?",
+        "UPDATE perfis SET foto=%s WHERE telegram_id=%s",
         (foto, user_id)
     )
 
