@@ -655,7 +655,7 @@ def menu_editar(message):
     cursor = conn.cursor()
 
     cursor.execute(
-        "SELECT telegram_id FROM perfis WHERE telegram_id=?",
+        "SELECT telegram_id FROM perfis WHERE telegram_id=%s",
         (user_id,)
     )
 
