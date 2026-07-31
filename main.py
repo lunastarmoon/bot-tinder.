@@ -443,6 +443,8 @@ def salvar_foto(message):
 
     bot.send_message(user_id, "📸 Foto recebida, salvando...")
 
+    bot.send_message(user_id, "💾 Conectei no banco...")
+
     conn = conectar()
     cursor = conn.cursor()
 
