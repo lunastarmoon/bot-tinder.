@@ -614,7 +614,7 @@ def ver_matches(message):
         AND p.telegram_id IN (
             SELECT de_id
             FROM curtidas
-            WHERE para_id = ?
+            WHERE para_id = %s
         )
     """, (user_id, user_id))
 
