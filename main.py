@@ -63,6 +63,8 @@ def conectar():
     return psycopg2.connect(
         os.getenv("DATABASE_URL")
     )
+
+
 def iniciar_banco():
 
     conn = conectar()
@@ -89,18 +91,17 @@ def iniciar_banco():
         )
     """)
 
- 
-cursor.execute("""
-    CREATE TABLE IF NOT EXISTS curtidas(
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS curtidas(
 
-        de_id BIGINT,
+            de_id BIGINT,
 
-        para_id BIGINT,
+            para_id BIGINT,
 
-        PRIMARY KEY(de_id, para_id)
+            PRIMARY KEY(de_id, para_id)
 
-    )
-""")
+        )
+    """)
 
     conn.commit()
     conn.close()
