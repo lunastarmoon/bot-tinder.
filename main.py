@@ -1038,8 +1038,8 @@ def curtir_perfil(call):
     cursor.execute("""
         SELECT 1
         FROM curtidas
-        WHERE de_id=?
-        AND para_id=?
+        WHERE de_id=%s
+        AND para_id=%s
     """, (perfil_id, user_id))
 
     match = cursor.fetchone()
@@ -1048,7 +1048,7 @@ def curtir_perfil(call):
     cursor.execute("""
         SELECT nome
         FROM perfis
-        WHERE telegram_id=?
+        WHERE telegram_id=%s
     """, (user_id,))
 
     meu_nome = cursor.fetchone()[0]
@@ -1057,7 +1057,7 @@ def curtir_perfil(call):
     cursor.execute("""
         SELECT nome
         FROM perfis
-        WHERE telegram_id=?
+        WHERE telegram_id=%s
     """, (perfil_id,))
 
     nome_alvo = cursor.fetchone()[0]
