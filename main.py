@@ -1443,7 +1443,7 @@ def processar_delete(call):
     cursor.execute(
         """
         DELETE FROM perfis
-        WHERE telegram_id=?
+        WHERE telegram_id=%s
         """,
         (user_id,)
     )
@@ -1452,8 +1452,8 @@ def processar_delete(call):
     cursor.execute(
         """
         DELETE FROM curtidas
-        WHERE de_id=?
-        OR para_id=?
+        WHERE de_id=%s
+        OR para_id=%s
         """,
         (user_id, user_id)
     )
@@ -1492,7 +1492,7 @@ def possui_perfil(user_id):
         """
         SELECT telegram_id
         FROM perfis
-        WHERE telegram_id=?
+        WHERE telegram_id=%s
         """,
         (user_id,)
     )
