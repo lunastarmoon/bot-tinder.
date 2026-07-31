@@ -817,7 +817,7 @@ def salvar_edicao(message):
     cursor = conn.cursor()
 
     cursor.execute(
-        f"UPDATE perfis SET {campo}=? WHERE telegram_id=?",
+        f"UPDATE perfis SET {campo}=%s WHERE telegram_id=%s",
         (valor, user_id)
     )
 
