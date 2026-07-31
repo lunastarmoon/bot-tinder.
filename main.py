@@ -78,10 +78,19 @@ def iniciar_banco():
 
             foto TEXT,
 
+            username TEXT,
+
             criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
         )
     """)
+
+    try:
+        cursor.execute(
+            "ALTER TABLE perfis ADD COLUMN username TEXT"
+        )
+    except:
+        pass
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS curtidas(
@@ -98,8 +107,8 @@ def iniciar_banco():
     conn.commit()
     conn.close()
 
-iniciar_banco()
 
+iniciar_banco()
 # ==========================================================
 # TECLADOS
 # ==========================================================
