@@ -17,6 +17,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 
 TOKEN = "8733102844:AAHRMw6ieQ4AKBEUXC9ZgY_54XS2q43Sx0M"
 
+print("TOKEN usado:", TOKEN[:10])
 print("TOKEN carregado?", TOKEN is not None)
 
 bot = telebot.TeleBot(TOKEN, parse_mode="Markdown")
