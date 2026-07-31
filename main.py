@@ -15,10 +15,11 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 # CONFIGURAÇÕES
 # ==========================================================
 
-TOKEN = "8733102844:AAHRMw6ieQ4AKBEUXC9ZgY_54XS2q43Sx0M"
+TOKEN = "8733102844:AAGL9ZW_2OtSh2cFiI_aL-JMxRHEE7bfsS8"
 
 print("TOKEN usado:", TOKEN[:10])
 print("TOKEN carregado?", TOKEN is not None)
+print("TESTE BOT INICIANDO")
 
 bot = telebot.TeleBot(TOKEN, parse_mode="Markdown")
 
