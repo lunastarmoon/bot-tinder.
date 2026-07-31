@@ -89,13 +89,7 @@ def iniciar_banco():
         )
     """)
 
-    try:
-        cursor.execute(
-            "ALTER TABLE perfis ADD COLUMN username TEXT"
-        )
-    except:
-        pass
-
+ 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS curtidas(
 
