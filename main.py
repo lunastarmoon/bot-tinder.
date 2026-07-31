@@ -15,7 +15,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 # CONFIGURAÇÕES
 # ==========================================================
 
-TOKEN = os.getenv('8733102844:AAF0Eif5ogzAqFcna5Z3xOv57yC8F-PXx-Y')
+TOKEN = os.getenv('8733102844:AAHRMw6ieQ4AKBEUXC9ZgY_54XS2q43Sx0M')
 
 print("TOKEN carregado?", TOKEN is not None)
 
