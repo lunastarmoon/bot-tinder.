@@ -1124,7 +1124,7 @@ def ver_meus_matches(message):
 
             SELECT para_id
             FROM curtidas
-            WHERE de_id=?tinderbot-db%s
+            WHERE de_id=%s
 
         )
 
