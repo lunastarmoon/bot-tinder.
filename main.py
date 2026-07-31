@@ -519,7 +519,7 @@ def ver_meu_perfil(message):
     cursor.execute("""
         SELECT nome, idade, bio, foto
         FROM perfis
-        WHERE telegram_id = ?
+        WHERE telegram_id = %s
     """, (user_id,))
 
     perfil = cursor.fetchone()
