@@ -879,7 +879,7 @@ def mostrar_proximo_perfil(message):
 
     # Verifica se o usuário possui perfil
     cursor.execute(
-        "SELECT telegram_id FROM perfis WHERE telegram_id=?",
+        "SELECT telegram_id FROM perfis WHERE telegram_id=%s",
         (user_id,)
     )
 
@@ -903,7 +903,7 @@ def mostrar_proximo_perfil(message):
             foto
         FROM perfis
 
-        WHERE telegram_id != ?
+        WHERE telegram_id != %s
 
         AND telegram_id NOT IN(
 
@@ -911,7 +911,7 @@ def mostrar_proximo_perfil(message):
 
             FROM curtidas
 
-            WHERE de_id=?
+            WHERE de_id=%s
 
         )
 
