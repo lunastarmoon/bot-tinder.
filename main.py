@@ -1031,7 +1031,7 @@ def curtir_perfil(call):
 
         conn.commit()
 
-    except sqlite3.IntegrityError:
+    except psycopg2.IntegrityError:
         pass
 
     # Verifica se existe match
