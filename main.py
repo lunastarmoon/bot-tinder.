@@ -90,17 +90,17 @@ def iniciar_banco():
     """)
 
  
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS curtidas(
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS curtidas(
 
-            de_id INTEGER,
+        de_id BIGINT,
 
-            para_id INTEGER,
+        para_id BIGINT,
 
-            PRIMARY KEY(de_id, para_id)
+        PRIMARY KEY(de_id, para_id)
 
-        )
-    """)
+    )
+""")
 
     conn.commit()
     conn.close()
