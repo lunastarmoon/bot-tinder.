@@ -72,7 +72,7 @@ def iniciar_banco():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS perfis(
 
-            telegram_id INTEGER PRIMARY KEY,
+            telegram_id BIGINT PRIMARY KEY,
 
             nome TEXT,
 
