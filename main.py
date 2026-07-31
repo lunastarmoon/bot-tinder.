@@ -1118,8 +1118,8 @@ def ver_meus_matches(message):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT p.nome
-        FROM perfis p
+    SELECT p.nome, p.username
+    FROM perfis p
 
         WHERE p.telegram_id IN (
 
@@ -1154,8 +1154,15 @@ def ver_meus_matches(message):
 
     texto = "💌 *Seus Matches*\n\n"
 
-    for nome in matches:
-        texto += f"❤️ {nome[0]}\n"
+    for pessoa in matches:
+
+    nome = pessoa[0]
+    username = pessoa[1]
+
+    if username:
+        texto += f"❤️ {nome} (@{username})\n"
+    else:
+        texto += f"❤️ {nome}\n"
 
     markup = InlineKeyboardMarkup(row_width=2)
 
