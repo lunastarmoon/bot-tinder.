@@ -1838,32 +1838,21 @@ def status_bot(message):
 
 
 # ==========================================================
-# FUNÇÃO DE SEGURANÇA DO POLLING
+# FUNÇÃO DE INICIAR BOT
 # ==========================================================
 
 def iniciar_bot():
 
-    while True:
+    print("🤖 Bot iniciado!")
 
-        try:
-
-            print("🤖 Bot iniciado!")
-
-            bot.infinity_polling(
-                timeout=60,
-                long_polling_timeout=60
-            )
+    bot.infinity_polling(
+        timeout=60,
+        long_polling_timeout=60
+    )
 
 
-        except Exception as erro:
-
-            print(
-                f"Erro no bot: {erro}"
-            )
-
-            limpar_dados_temporarios()
 # ==========================================================
-# INICIAR BOT
+# EXECUTAR BOT
 # ==========================================================
 
 if __name__ == "__main__":
