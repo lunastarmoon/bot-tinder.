@@ -1026,7 +1026,7 @@ def curtir_perfil(call):
                 de_id,
                 para_id
             )
-            VALUES(?, ?)
+            VALUES(%s, %s)
         """, (user_id, perfil_id))
 
         conn.commit()
