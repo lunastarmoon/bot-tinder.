@@ -1848,19 +1848,21 @@ def iniciar_bot():
 
         try:
 
-            print("🤖 Bot iniciado!")
+    print("🤖 Bot iniciado!")
 
-            bot.infinity_polling(
-                timeout=60,
-                long_polling_timeout=60,
-                skip_pending=True
-            )
+    bot.infinity_polling(
+        timeout=60,
+        long_polling_timeout=60,
+        skip_pending=True
+    )
 
-        except Exception as erro:
+    print("⚠️ O polling terminou sozinho!")
 
-            print(f"Erro no bot: {erro}")
+except Exception as erro:
 
-            time.sleep(5)
+    print(f"Erro no bot: {erro}")
+
+    time.sleep(5)
 # ==========================================================
 # EXECUTAR BOT
 # ==========================================================
