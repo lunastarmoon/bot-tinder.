@@ -24,7 +24,7 @@ TOKEN = os.getenv("TOKEN")
 
 print("TOKEN:", repr(TOKEN))
 
-bot = telebot.TeleBot(TOKEN, parse_mode="Markdown")
+bot = telebot.TeleBot(TOKEN)
 
 print("TOKEN:", repr(TOKEN))
 print("TOKEN carregado?", TOKEN is not None)
