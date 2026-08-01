@@ -1,10 +1,9 @@
 import os
-
-print("TESTE 123456")
-
-import psycopg2
+import time
 import threading
-import time 
+from flask import Flask
+import telebot
+import psycopg2 
 
 import telebot
 from telebot.types import (
