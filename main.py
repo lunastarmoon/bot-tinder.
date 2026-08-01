@@ -1848,38 +1848,23 @@ def status_bot(message):
 
 @bot.message_handler(commands=["curtidas"])
 def mostrar_curtidas(message):
-    import sqlite3
-    chat_id = message.chat.id
+    import sqlite3; chat_id = message.chat.id
     try:
-        conexao = sqlite3.connect("tinder.db")
-        cursor = conexao.cursor()
-        
-        cursor.execute("SELECT perfil_curtido FROM curtidas WHERE usuario_id = ?", (chat_id,))
-        meus_likes = cursor.fetchall()
-        
-        cursor.execute("SELECT quem_curtiu FROM curtidas_recebidas WHERE usuario_id = ?", (chat_id,))
-        likes_recebidos = cursor.fetchall()
-        conexao.close()
-        
-        texto = "💘 *HISTÓRICO DE CURTIDAS*\n\n"
-        texto += "👉 *Perfis que você curtiu:*\n"
+        conexao = sqlite3.connect("tinder.db"); cursor = conexao.cursor()
+        cursor.execute("SELECT perfil_curtido FROM curtidas WHERE usuario_id = ?", (chat_id,)); meus_likes = cursor.fetchall()
+        cursor.execute("SELECT quem_curtiu FROM curtidas_recebidas WHERE usuario_id = ?", (chat_id,)); likes_recebidos = cursor.fetchall(); conexao.close()
+        texto = "💘 *HISTÓRICO DE CURTIDAS*\n\n👉 *Perfim que você curtiu:*\n"
         if meus_likes:
-            for item in meus_likes:
-                texto += f"• {item[0]}\n"
-        else:
-            texto += "• Nenhum perfil curtiu ainda.\n"
-            
+            for item in meus_likes: texto += f"• {item[0]}\n"
+        else: texto += "• Nenhum perfil curtiu ainda.\n"
         texto += "\n✨ *Quem te curtiu:*\n"
         if likes_recebidos:
-            for item in likes_recebidos:
-                texto += f"• {item[0]}\n"
-        else:
-            texto += "• Nenhuma curtida recebida ainda.\n"
-            
+            for item in likes_recebidos: texto += f"• {item[0]}\n"
+        else: texto += "• Nenhuma curtida recebida ainda.\n"
         bot.send_message(chat_id, texto, parse_mode="Markdown")
     except Exception as erro:
-        print(f"Erro ao buscar curtidas no banco: {erro}")
-        bot.send_message(chat_id, "❌ Erro ao acessar o histórico de curtidas.")
+        print(f"Erro no banco: {erro}"); bot.send_message(chat_id, "❌ Erro ao acessar o banco de dados.")
+
         
 # ==========================================================
 # FUNÇÃO DE INICIAR BOT
