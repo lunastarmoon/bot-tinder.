@@ -1,4 +1,7 @@
 import os
+
+print("TESTE 123456")
+
 import psycopg2
 import threading
 import time 
