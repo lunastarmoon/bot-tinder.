@@ -194,17 +194,13 @@ def start(message):
         "Aqui você pode conhecer novas pessoas, "
         "curtir perfis e fazer matches.\n\n"
         "Para começar, crie seu perfil." 
-        "Se você não for uma conta derpnãofaçaconta."
+        "Se você não for uma conta de rp não faça conta."
     )
 
     bot.send_message(
-
         message.chat.id,
-
         texto,
-
         reply_markup=teclado_menu()
-
     )
 
 # ==========================================================
