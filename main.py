@@ -204,6 +204,40 @@ def start(message):
     )
 
 # ==========================================================
+# CURTIDAS
+# ==========================================================
+
+@bot.message_handler(commands=["curtidas"])
+def mostrar_curtidas(message):
+
+    import sqlite3
+
+    chat_id = message.chat.id
+
+    try:
+        conexao = sqlite3.connect("tinder.db")
+        cursor = conexao.cursor()
+
+        cursor.execute("SELECT perfil_curtido FROM curtidas WHERE usuario_id = ?", (chat_id,))
+        meus_likes = cursor.fetchall()
+
+        cursor.execute("SELECT quem_curtiu FROM curtidas_recebidas WHERE usuario_id = ?", (chat_id,))
+        likes_recebidos = cursor.fetchall()
+        conexao.close()
+
+        texto = (
+            "💘 *Histórico de Curtidas!*\n\n"
+            f"👉 Perfis que você curtiu: {len(meus_likes)}\n"
+            f"✨ Quem te curtiu: {len(likes_recebidos)}"
+        )
+
+        bot.send_message(message.chat.id, texto)
+
+    except Exception as erro:
+        print(f"Erro: {erro}")
+        bot.send_message(message.chat.id, "❌ Erro ao acessar o banco.")
+        
+# ==========================================================
 # AJUDA
 # ==========================================================
 
@@ -1837,41 +1871,6 @@ def status_bot(message):
         message.chat.id,
         "✅ Bot online e funcionando!"
     )
-
-# ==========================================================
-# CURTIDAS
-# ==========================================================
-
-@bot.message_handler(commands=["curtidas"])
-def mostrar_curtidas(message):
-
-    import sqlite3
-
-    chat_id = message.chat.id
-
-    try:
-        conexao = sqlite3.connect("tinder.db")
-        cursor = conexao.cursor()
-
-        cursor.execute("SELECT perfil_curtido FROM curtidas WHERE usuario_id = ?", (chat_id,))
-        meus_likes = cursor.fetchall()
-
-        cursor.execute("SELECT quem_curtiu FROM curtidas_recebidas WHERE usuario_id = ?", (chat_id,))
-        likes_recebidos = cursor.fetchall()
-        conexao.close()
-
-        texto = (
-            "💘 *Histórico de Curtidas!*\n\n"
-            f"👉 Perfis que você curtiu: {len(meus_likes)}\n"
-            f"✨ Quem te curtiu: {len(likes_recebidos)}"
-        )
-
-        bot.send_message(message.chat.id, texto)
-
-    except Exception as erro:
-        print(f"Erro: {erro}")
-        bot.send_message(message.chat.id, "❌ Erro ao acessar o banco.")
-
         
 # ==========================================================
 # FUNÇÃO DE INICIAR BOT
