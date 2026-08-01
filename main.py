@@ -48,7 +48,7 @@ class ServidorHTTP(BaseHTTPRequestHandler):
 
 def iniciar_servidor():
 
-    porta = int(os.environ.get("PORT", 10000))
+    porta = int(os.environ.get("PORT", 5000))
 
     servidor = HTTPServer(
         ("0.0.0.0", porta),
