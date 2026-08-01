@@ -1868,9 +1868,6 @@ def iniciar_bot():
 
 if __name__ == "__main__":
 
-    print("===================================")
-    print("❤️ Tinder Bot iniciado com sucesso!")
-    print("🤖 Aguardando mensagens...")
-    print("===================================")
+    print("TESTE CHEGOU NO FINAL DO ARQUIVO")
 
     iniciar_bot()
