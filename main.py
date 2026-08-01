@@ -17,7 +17,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 
 TOKEN = os.getenv("8733102844:AAHBPHT0bela04yqKBSume_XTQTYQlhqv98")
 
-print("TOKEN usado:", TOKEN[:10])
+print("TOKEN:", repr(TOKEN))
 print("TOKEN carregado?", TOKEN is not None)
 print("TESTE BOT INICIANDO")
 
