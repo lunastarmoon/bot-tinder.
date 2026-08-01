@@ -602,7 +602,7 @@ def ver_matches(message):
 
     user_id = message.chat.id
 
-    conn = conectar_bd()
+    conn = conectar()
     cursor = conn.cursor()
 
     cursor.execute("""
