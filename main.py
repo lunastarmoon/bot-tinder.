@@ -15,13 +15,17 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 # CONFIGURAÇÕES
 # ==========================================================
 
-TOKEN = os.getenv("8733102844:AAHBPHT0bela04yqKBSume_XTQTYQlhqv98")
+print("TOKEN existe?", "TOKEN" in os.environ)
+
+TOKEN = os.getenv("TOKEN")
+
+print("TOKEN:", repr(TOKEN))
+
+bot = telebot.TeleBot(TOKEN, parse_mode="Markdown")
 
 print("TOKEN:", repr(TOKEN))
 print("TOKEN carregado?", TOKEN is not None)
 print("TESTE BOT INICIANDO")
-
-bot = telebot.TeleBot(TOKEN, parse_mode="Markdown")
 
 DB_NAME = "tinder.db"
 
