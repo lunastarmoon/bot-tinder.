@@ -238,36 +238,35 @@ def start(message):
     )
 
 # =======================================================
-# # CURTIDAS (TESTE DE COMPATIBILIDADE)
+# # CURTIDAS (TESTE DE COMPATIBILIDADE CORRIGIDO)
 # =======================================================
-
 @bot.message_handler(commands=["curtidas"])
 def mostrar_curtidas(message):
     import sqlite3
     chat_id = message.chat.id
     
-    # Lista de nomes de tabelas que você pode estar usando no seu bot antigo
-    tabelas_para_testar = ["likes", "meus_likes", "historico", "combinacoes", "curtidas"]
-    tabela_detectada = "Nenhuma"
-    
     try:
         conexao = sqlite3.connect(DB_NAME)
         cursor = conexao.cursor()
         
-        # Descobre qual tabela realmente existe no seu banco antigo
+        # Busca o nome das tabelas
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-        todas_tabelas = [row[0] for row in cursor.fetchall()]
-        
+        linhas = cursor.fetchall()
         conexao.close()
         
-        texto_diagnostico = (
-            "🔍 *Investigação do Bot:*\n\n"
-            f"As tabelas que existem no seu banco são:\n"
-            f"🔹 " + "\n🔹 ".join(todas_tabelas) + "\n\n"
-            "Mande um print desta mensagem para o chat que eu arrumo o código com os nomes certos!"
-        )
+        # Limpa o formato do Python para deixar apenas o texto puro da tabela
+        nomes_tabelas = [row[0] for row in linhas]
         
-        bot.send_message(chat_id, texto_diagnostico, parse_mode="Markdown")
+        # Monta a mensagem sem usar Markdown complexo para não dar erro
+        texto_diagnostico = "🔍 INVESTIGAÇÃO DO BOT:\n\n"
+        texto_diagnostico += "As tabelas que existem no seu banco sao:\n"
+        
+        for nome in nomes_tabelas:
+            texto_diagnostico += f"🔹 {nome}\n"
+            
+        texto_diagnostico += "\nMande um print desta resposta para descobrir as tabelas certas!"
+        
+        bot.send_message(chat_id, texto_diagnostico)
         return
 
     except Exception as erro:
