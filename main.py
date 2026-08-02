@@ -238,51 +238,64 @@ def start(message):
     )
 
 # =======================================================
-# # CURTIDAS (DEFINITIVO - COM NOMES DOS PERFIS)
+# # CURTIDAS (CORRIGIDO COM A ESTRUTURA REAL DO BANCO)
 # =======================================================
-
+q
 @bot.message_handler(commands=["curtidas"])
 def mostrar_curtidas(message):
-    import sqlite3
-    chat_id = message.chat.id
+    user_id = message.chat.id
     
     try:
-        conexao = sqlite3.connect(DB_NAME)
-        cursor = conexao.cursor()
+        conn = conectar()
+        cursor = conn.cursor()
         
-        # 1. Busca os NOMES dos perfis que você curtiu
+        # 1. Busca os NOMES e USER_NAMES dos perfis que VOCÊ curtiu (de_id é você)
         cursor.execute("""
-            SELECT u.nome 
+            SELECT p.nome, p.username 
             FROM curtidas c
-            JOIN usuarios u ON c.perfil_curtido = u.chat_id
-            WHERE c.quem_curtiu = ?
-        """, (chat_id,))
+            JOIN perfis p ON c.para_id = p.telegram_id
+            WHERE c.de_id = %s
+        """, (user_id,))
         meus_likes = cursor.fetchall()
         
-        # 2. Busca os NOMES de quem curtiu você
+        # 2. Busca os NOMES e USER_NAMES de quem curtiu VOCÊ (para_id é você)
         cursor.execute("""
-            SELECT u.nome 
+            SELECT p.nome, p.username 
             FROM curtidas c
-            JOIN usuarios u ON c.quem_curtiu = u.chat_id
-            WHERE c.perfil_curtido = ?
-        """, (chat_id,))
+            JOIN perfis p ON c.de_id = p.telegram_id
+            WHERE c.para_id = %s
+        """, (user_id,))
         likes_recebidos = cursor.fetchall()
         
-        conexao.close()
+        conn.close()
         
         # Formatando a lista de perfis que você curtiu
         if meus_likes:
-            lista_meus_likes = "\n".join(f"🔹 {linha[0]}" for linha in meus_likes)
+            linhas_meus_likes = []
+            for nome, username in meus_likes:
+                if username:
+                    user_limpo = str(username).replace("@", "")
+                    linhas_meus_likes.append(f"🔹 {nome} (@{user_limpo})")
+                else:
+                    linhas_meus_likes.append(f"🔹 {nome}")
+            lista_meus_likes = "\n".join(linhas_meus_likes)
         else:
             lista_meus_likes = "Nenhum perfil curtiu ainda."
             
         # Formatando a lista de quem te curtiu
         if likes_recebidos:
-            lista_recebidos = "\n".join(f"✨ {linha[0]}" for linha in likes_recebidos)
+            linhas_recebidos = []
+            for nome, username in likes_recebidos:
+                if username:
+                    user_limpo = str(username).replace("@", "")
+                    linhas_recebidos.append(f"✨ {nome} (@{user_limpo})")
+                else:
+                    linhas_recebidos.append(f"✨ {nome}")
+            lista_recebidos = "\n".join(linhas_recebidos)
         else:
             lista_recebidos = "Ninguém te curtiu ainda."
         
-        # Monta a mensagem final
+        # Monta a mensagem final bem organizada
         texto = (
             "💖 *Histórico de Curtidas!*\n\n"
             "👤 *Perfis que você curtiu:*\n"
@@ -291,11 +304,11 @@ def mostrar_curtidas(message):
             f"{lista_recebidos}"
         )
         
-        bot.send_message(chat_id, texto, parse_mode="Markdown")
+        bot.send_message(user_id, texto, parse_mode="Markdown")
         return
 
     except Exception as erro:
-        bot.send_message(chat_id, f"❌ Erro ao acessar dados: {erro}")
+        bot.send_message(user_id, f"❌ Erro ao acessar curtidas: {erro}")
         return
 
 # ==========================================================
