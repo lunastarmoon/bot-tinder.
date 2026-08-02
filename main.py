@@ -33,6 +33,40 @@ DB_NAME = "tinder.db"
 dados_cadastro = {}
 dados_edicao = {}
 
+# =======================================================
+# CONFIGURAÇÃO INICIAL DO BANCO DE DADOS
+# =======================================================
+def inicializar_banco():
+    import sqlite3
+    conexao = sqlite3.connect("tinder.db")
+    cursor = conexao.cursor()
+    
+    # 1. Tabela para salvar os perfis dos usuários
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS usuarios (
+        chat_id INTEGER PRIMARY KEY,
+        nome TEXT,
+        bio TEXT,
+        foto TEXT
+    );
+    """)
+    
+    # 2. Tabela para registrar as curtidas (Quem curtiu Quem)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS curtidas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        quem_curtiu INTEGER,
+        perfil_curtido INTEGER,
+        status TEXT DEFAULT 'pendente'
+    );
+    """)
+    
+    conexao.commit()
+    conexao.close()
+
+# Executa a função para garantir que o banco existe antes do bot rodar
+inicializar_banco()
+
 # ==========================================================
 # SERVIDOR HTTP (RENDER)
 # ==========================================================
