@@ -240,16 +240,17 @@ def start(message):
 # =======================================================
 # # CURTIDAS (CORRIGIDO COM A ESTRUTURA REAL DO BANCO)
 # =======================================================
-q
-@bot.message_handler(commands=["curtidas"])
-def mostrar_curtidas(message):
+# # COMANDO: /meus_likes
+# =======================================================
+@bot.message_handler(commands=["meus_likes"])
+def mostrar_meus_likes(message):
     user_id = message.chat.id
     
     try:
         conn = conectar()
         cursor = conn.cursor()
         
-        # 1. Busca os NOMES e USER_NAMES dos perfis que VOCÊ curtiu (de_id é você)
+        # Busca os NOMES e USER_NAMES dos perfis que VOCÊ curtiu (de_id é você)
         cursor.execute("""
             SELECT p.nome, p.username 
             FROM curtidas c
@@ -257,19 +258,8 @@ def mostrar_curtidas(message):
             WHERE c.de_id = %s
         """, (user_id,))
         meus_likes = cursor.fetchall()
-        
-        # 2. Busca os NOMES e USER_NAMES de quem curtiu VOCÊ (para_id é você)
-        cursor.execute("""
-            SELECT p.nome, p.username 
-            FROM curtidas c
-            JOIN perfis p ON c.de_id = p.telegram_id
-            WHERE c.para_id = %s
-        """, (user_id,))
-        likes_recebidos = cursor.fetchall()
-        
         conn.close()
         
-        # Formatando a lista de perfis que você curtiu
         if meus_likes:
             linhas_meus_likes = []
             for nome, username in meus_likes:
@@ -279,10 +269,39 @@ def mostrar_curtidas(message):
                 else:
                     linhas_meus_likes.append(f"🔹 {nome}")
             lista_meus_likes = "\n".join(linhas_meus_likes)
+            texto = f"👤 *Perfis que você curtiu:*\n\n{lista_meus_likes}"
         else:
-            lista_meus_likes = "Nenhum perfil curtiu ainda."
-            
-        # Formatando a lista de quem te curtiu
+            texto = "👤 Você ainda não curtiu nenhum perfil."
+        
+        bot.send_message(user_id, texto, parse_mode="Markdown")
+        return
+
+    except Exception as erro:
+        bot.send_message(user_id, f"❌ Erro ao acessar seus likes: {erro}")
+        return
+
+
+# =======================================================
+# # COMANDO: /quem_me_curtiu
+# =======================================================
+@bot.message_handler(commands=["quem_me_curtiu"])
+def mostrar_quem_me_curtiu(message):
+    user_id = message.chat.id
+    
+    try:
+        conn = conectar()
+        cursor = conn.cursor()
+        
+        # Busca os NOMES e USER_NAMES de quem curtiu VOCÊ (para_id é você)
+        cursor.execute("""
+            SELECT p.nome, p.username 
+            FROM curtidas c
+            JOIN perfis p ON c.de_id = p.telegram_id
+            WHERE c.para_id = %s
+        """, (user_id,))
+        likes_recebidos = cursor.fetchall()
+        conn.close()
+        
         if likes_recebidos:
             linhas_recebidos = []
             for nome, username in likes_recebidos:
@@ -292,23 +311,15 @@ def mostrar_curtidas(message):
                 else:
                     linhas_recebidos.append(f"✨ {nome}")
             lista_recebidos = "\n".join(linhas_recebidos)
+            texto = f"✨ *Perfis que curtiram você:*\n\n{lista_recebidos}"
         else:
-            lista_recebidos = "Ninguém te curtiu ainda."
-        
-        # Monta a mensagem final bem organizada
-        texto = (
-            "💖 *Histórico de Curtidas!*\n\n"
-            "👤 *Perfis que você curtiu:*\n"
-            f"{lista_meus_likes}\n\n"
-            "✨ *Quem te curtiu:*\n"
-            f"{lista_recebidos}"
-        )
+            texto = "✨ Ninguém te curtiu ainda. Continue tentando!"
         
         bot.send_message(user_id, texto, parse_mode="Markdown")
         return
 
     except Exception as erro:
-        bot.send_message(user_id, f"❌ Erro ao acessar curtidas: {erro}")
+        bot.send_message(user_id, f"❌ Erro ao acessar curtidas recebidas: {erro}")
         return
 
 # ==========================================================
