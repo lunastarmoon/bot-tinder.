@@ -695,14 +695,15 @@ def ver_meu_perfil(message):
 
 @bot.message_handler(commands=["matches"])
 def ver_matches(message):
-
+    
     user_id = message.chat.id
-
+    
     conn = conectar()
     cursor = conn.cursor()
-
+    
+    # Adicionamos p.username na busca para puxar o @ de cada perfil
     cursor.execute("""
-        SELECT p.nome, p.telegram_id
+        SELECT p.nome, p.telegram_id, p.username
         FROM perfis p
         WHERE p.telegram_id IN (
             SELECT para_id
@@ -715,26 +716,28 @@ def ver_matches(message):
             WHERE para_id = %s
         )
     """, (user_id, user_id))
-
+    
     matches = cursor.fetchall()
-
     conn.close()
-
-
+    
     if not matches:
         bot.send_message(
             user_id,
             "💔 Você ainda não tem nenhum match."
         )
         return
-
-
+        
     texto = "💌 Seus Matches:\n\n"
-
-    for nome, id_pessoa in matches:
-        texto += f"❤️ {nome}\n"
-
-
+    
+    # Agora o Python lê o nome, o id e o username de cada match
+    for nome, id_pessoa, username in matches:
+        if username:
+            # Remove o @ caso ele já esteja salvo com o símbolo no banco
+            user_limpo = str(username).replace("@", "")
+            texto += f"❤️ {nome} (@{user_limpo})\n"
+        else:
+            texto += f"❤️ {nome}\n"
+            
     bot.send_message(
         user_id,
         texto
