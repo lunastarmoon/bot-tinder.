@@ -203,39 +203,41 @@ def start(message):
         reply_markup=teclado_menu()
     )
 
-# ==========================================================
-# CURTIDAS
-# ==========================================================
+# =======================================================
+# # CURTIDAS (MODO DIAGNÓSTICO)
+# =======================================================
 
 @bot.message_handler(commands=["curtidas"])
 def mostrar_curtidas(message):
-
     import sqlite3
-
     chat_id = message.chat.id
-
+    
     try:
+        # 1. Tenta conectar (ajuste o nome do arquivo se não for tinder.db)
         conexao = sqlite3.connect("tinder.db")
         cursor = conexao.cursor()
-
-        cursor.execute("SELECT perfil_curtido FROM curtidas WHERE usuario_id = ?", (chat_id,))
+        
+        # 2. Vamos tentar rodar o comando clássico
+        cursor.execute("SELECT perfil_curtido FROM meus_likes WHERE chat_id = ?", (chat_id,))
         meus_likes = cursor.fetchall()
-
-        cursor.execute("SELECT quem_curtiu FROM curtidas_recebidas WHERE usuario_id = ?", (chat_id,))
+        
+        cursor.execute("SELECT quem_curtiu FROM likes_recebidos WHERE chat_id = ?", (chat_id,))
         likes_recebidos = cursor.fetchall()
         conexao.close()
-
+        
         texto = (
-            "💘 *Histórico de Curtidas!*\n\n"
-            f"👉 Perfis que você curtiu: {len(meus_likes)}\n"
-            f"✨ Quem te curtiu: {len(likes_recebidos)}"
+            "💖 *Histórico de Curtidas!*\n\n"
+            f"👤 *Perfis que você curtiu:* {len(meus_likes)}\n"
+            f"✨ *Quem te curtiu:* {len(likes_recebidos)}"
         )
-
-        bot.send_message(message.chat.id, texto)
+        bot.send_message(chat_id, texto, parse_mode="Markdown")
+        return
 
     except Exception as erro:
-        print(f"Erro: {erro}")
-        bot.send_message(message.chat.id, "❌ Erro ao acessar o banco.")
+        # Se der erro, o bot vai te mandar a mensagem real do Python no chat!
+        mensagem_erro = f"❌ Erro Técnico: {erro}"
+        bot.send_message(chat_id, mensagem_erro)
+        return
         
 # ==========================================================
 # AJUDA
