@@ -238,7 +238,7 @@ def start(message):
     )
 
 # =======================================================
-# # CURTIDAS (LISTA DE PERFIS)
+# # CURTIDAS (TESTE DE COMPATIBILIDADE)
 # =======================================================
 
 @bot.message_handler(commands=["curtidas"])
@@ -246,56 +246,32 @@ def mostrar_curtidas(message):
     import sqlite3
     chat_id = message.chat.id
     
+    # Lista de nomes de tabelas que você pode estar usando no seu bot antigo
+    tabelas_para_testar = ["likes", "meus_likes", "historico", "combinacoes", "curtidas"]
+    tabela_detectada = "Nenhuma"
+    
     try:
         conexao = sqlite3.connect(DB_NAME)
         cursor = conexao.cursor()
         
-        # 1. Busca os NOMES dos perfis que você curtiu
-        cursor.execute("""
-            SELECT u.nome 
-            FROM curtidas c
-            JOIN usuarios u ON c.perfil_curtido = u.chat_id
-            WHERE c.quem_curtiu = ?
-        """, (chat_id,))
-        meus_likes = cursor.fetchall()
-        
-        # 2. Busca os NOMES de quem curtiu você
-        cursor.execute("""
-            SELECT u.nome 
-            FROM curtidas c
-            JOIN usuarios u ON c.quem_curtiu = u.chat_id
-            WHERE c.perfil_curtido = ?
-        """, (chat_id,))
-        likes_recebidos = cursor.fetchall()
+        # Descobre qual tabela realmente existe no seu banco antigo
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        todas_tabelas = [row[0] for row in cursor.fetchall()]
         
         conexao.close()
         
-        # Formatando a lista de perfis que você curtiu
-        if meus_likes:
-            lista_meus_likes = "\n".join(f"🔹 {perfil[0]}" for perfil in meus_likes)
-        else:
-            lista_meus_likes = "Nenhum perfil curtiu ainda."
-            
-        # Formatando a lista de quem te curtiu
-        if likes_recebidos:
-            lista_recebidos = "\n".join(f"✨ {perfil[0]}" for perfil in likes_recebidos)
-        else:
-            lista_recebidos = "Ninguém te curtiu ainda."
-        
-        # Monta a mensagem final
-        texto = (
-            "💖 *Histórico de Curtidas!*\n\n"
-            "👤 *Perfis que você curtiu:*\n"
-            f"{lista_meus_likes}\n\n"
-            "✨ *Quem te curtiu:*\n"
-            f"{lista_recebidos}"
+        texto_diagnostico = (
+            "🔍 *Investigação do Bot:*\n\n"
+            f"As tabelas que existem no seu banco são:\n"
+            f"🔹 " + "\n🔹 ".join(todas_tabelas) + "\n\n"
+            "Mande um print desta mensagem para o chat que eu arrumo o código com os nomes certos!"
         )
         
-        bot.send_message(chat_id, texto, parse_mode="Markdown")
+        bot.send_message(chat_id, texto_diagnostico, parse_mode="Markdown")
         return
 
     except Exception as erro:
-        bot.send_message(chat_id, f"❌ Erro ao acessar dados: {erro}")
+        bot.send_message(chat_id, f"❌ Erro no teste: {erro}")
         return
 
 # ==========================================================
