@@ -238,32 +238,38 @@ def start(message):
     )
 
 # =======================================================
-# # CURTIDAS (ESPIÃO DE TABELAS)
+# # CURTIDAS (DEFINITIVO)
 # =======================================================
-
 @bot.message_handler(commands=["curtidas"])
 def mostrar_curtidas(message):
     import sqlite3
     chat_id = message.chat.id
     
     try:
-        conexao = sqlite3.connect("tinder.db")
+        conexao = sqlite3.connect(DB_NAME)
         cursor = conexao.cursor()
         
-        # Este comando busca o nome de todas as tabelas criadas no banco
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-        tabelas = cursor.fetchall()
+        # Busca a quantidade de curtidas dadas (pega o primeiro item da tupla resultado)
+        cursor.execute("SELECT COUNT(*) FROM curtidas WHERE quem_curtiu = ?", (chat_id,))
+        meus_likes = cursor.fetchone()[0]
+        
+        # Busca a quantidade de curtidas recebidas (pega o primeiro item da tupla resultado)
+        cursor.execute("SELECT COUNT(*) FROM curtidas WHERE perfil_curtido = ?", (chat_id,))
+        likes_recebidos = cursor.fetchone()[0]
+        
         conexao.close()
         
-        # Transforma a lista de tabelas em texto
-        lista_tabelas = [t[0] for t in tabelas]
-        texto = "📋 *Tabelas encontradas no seu banco:*\n\n" + "\n".join(f"🔹 {nome}" for nome in lista_tabelas)
+        texto = (
+            "💖 *Histórico de Curtidas!*\n\n"
+            f"👤 *Perfis que você curtiu:* {meus_likes}\n"
+            f"✨ *Quem te curtiu:* {likes_recebidos}"
+        )
         
         bot.send_message(chat_id, texto, parse_mode="Markdown")
         return
 
     except Exception as erro:
-        bot.send_message(chat_id, f"❌ Erro ao listar: {erro}")
+        bot.send_message(chat_id, f"❌ Erro ao acessar dados: {erro}")
         return
         
 # ==========================================================
