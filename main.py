@@ -506,3 +506,411 @@ def ver_meus_matches(message):
         texto
     )
 
+# ==========================================================
+# EDITAR PERFIL
+# ==========================================================
+
+@bot.message_handler(commands=["editar"])
+def menu_editar(message):
+
+    user_id = message.chat.id
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT telegram_id FROM perfis WHERE telegram_id=%s",
+        (user_id,)
+    )
+
+    if not cursor.fetchone():
+        conn.close()
+        bot.send_message(
+            user_id,
+            "❌ Você ainda não possui um perfil."
+        )
+        return
+
+    conn.close()
+
+    markup = InlineKeyboardMarkup(row_width=2)
+
+    markup.add(
+        InlineKeyboardButton("👤 Nome", callback_data="editar_nome"),
+        InlineKeyboardButton("🎂 Idade", callback_data="editar_idade")
+    )
+
+    markup.add(
+        InlineKeyboardButton("📝 Bio", callback_data="editar_bio"),
+        InlineKeyboardButton("📸 Foto", callback_data="editar_foto")
+    )
+
+    markup.add(
+        InlineKeyboardButton("🏠 Menu", callback_data="menu_inicio")
+    )
+
+    bot.send_message(
+        user_id,
+        "✏️ O que deseja editar?",
+        reply_markup=markup
+    )
+
+
+# ==========================================================
+# CALLBACK EDITAR
+# ==========================================================
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("editar_"))
+def callback_editar(call):
+
+    user_id = call.message.chat.id
+
+    if call.data == "editar_nome":
+        dados_edicao[user_id] = "nome"
+        msg = bot.send_message(user_id, "Digite o novo nome:")
+        bot.register_next_step_handler(msg, salvar_edicao)
+
+    elif call.data == "editar_idade":
+        dados_edicao[user_id] = "idade"
+        msg = bot.send_message(user_id, "Digite a nova idade:")
+        bot.register_next_step_handler(msg, salvar_edicao)
+
+    elif call.data == "editar_bio":
+        dados_edicao[user_id] = "bio"
+        msg = bot.send_message(user_id, "Digite a nova bio:")
+        bot.register_next_step_handler(msg, salvar_edicao)
+
+    elif call.data == "editar_foto":
+        dados_edicao[user_id] = "foto"
+        msg = bot.send_message(user_id, "Envie a nova foto:")
+        bot.register_next_step_handler(msg, salvar_edicao_foto)
+
+
+def salvar_edicao(message):
+
+    user_id = message.chat.id
+
+    if user_id not in dados_edicao:
+        return
+
+    campo = dados_edicao[user_id]
+    valor = message.text.strip()
+
+    if campo == "idade":
+
+        try:
+            valor = int(valor)
+        except:
+            bot.send_message(user_id, "Digite apenas números.")
+            return
+
+        if valor < 18:
+            bot.send_message(user_id, "A idade mínima é 18 anos.")
+            return
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        f"UPDATE perfis SET {campo}=%s WHERE telegram_id=%s",
+        (valor, user_id)
+    )
+
+    conn.commit()
+    conn.close()
+
+    del dados_edicao[user_id]
+
+    bot.send_message(
+        user_id,
+        "✅ Perfil atualizado!"
+    )
+
+
+def salvar_edicao_foto(message):
+
+    user_id = message.chat.id
+
+    if user_id not in dados_edicao:
+        return
+
+    if message.content_type != "photo":
+        bot.send_message(user_id, "Envie uma foto.")
+        return
+
+    foto = message.photo[-1].file_id
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "UPDATE perfis SET foto=%s WHERE telegram_id=%s",
+        (foto, user_id)
+    )
+
+    conn.commit()
+    conn.close()
+
+    del dados_edicao[user_id]
+
+    bot.send_message(
+        user_id,
+        "✅ Foto atualizada!"
+    )
+
+# ==========================================================
+# TINDER
+# ==========================================================
+
+@bot.message_handler(commands=["tinder"])
+def mostrar_proximo_perfil(message):
+
+    user_id = message.chat.id
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    # Verifica se possui perfil
+    cursor.execute(
+        "SELECT telegram_id FROM perfis WHERE telegram_id=%s",
+        (user_id,)
+    )
+
+    if not cursor.fetchone():
+
+        conn.close()
+
+        bot.send_message(
+            user_id,
+            "❌ Você precisa criar um perfil primeiro.\n\nUse /cadastro."
+        )
+
+        return
+
+    # Busca um perfil ainda não visto
+    cursor.execute("""
+        SELECT
+            telegram_id,
+            nome,
+            idade,
+            bio,
+            foto
+        FROM perfis
+        WHERE telegram_id <> %s
+        AND telegram_id NOT IN(
+            SELECT para_id
+            FROM curtidas
+            WHERE de_id=%s
+        )
+        ORDER BY RANDOM()
+        LIMIT 1
+    """, (user_id, user_id))
+
+    perfil = cursor.fetchone()
+
+    conn.close()
+
+    if not perfil:
+
+        bot.send_message(
+            user_id,
+            "✨ Você já viu todos os perfis disponíveis."
+        )
+
+        return
+
+    perfil_id, nome, idade, bio, foto = perfil
+
+    markup = InlineKeyboardMarkup(row_width=2)
+
+    markup.add(
+        InlineKeyboardButton(
+            "❌ Pular",
+            callback_data=f"nao_{perfil_id}"
+        ),
+        InlineKeyboardButton(
+            "❤️ Curtir",
+            callback_data=f"sim_{perfil_id}"
+        )
+    )
+
+    markup.add(
+        InlineKeyboardButton(
+            "🏠
+
+    # ==========================================================
+# ESTATÍSTICAS
+# ==========================================================
+
+@bot.message_handler(commands=["stats"])
+def estatisticas_perfil(message):
+
+    user_id = message.chat.id
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM curtidas
+        WHERE para_id=%s
+    """, (user_id,))
+    curtidas = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM curtidas c1
+        WHERE c1.de_id=%s
+        AND EXISTS(
+            SELECT 1
+            FROM curtidas c2
+            WHERE c2.de_id=c1.para_id
+            AND c2.para_id=%s
+        )
+    """, (user_id, user_id))
+    matches = cursor.fetchone()[0]
+
+    conn.close()
+
+    texto = (
+        "📊 *Suas Estatísticas*\n\n"
+        f"❤️ Curtidas recebidas: {curtidas}\n"
+        f"💌 Matches: {matches}"
+    )
+
+    markup = InlineKeyboardMarkup()
+
+    markup.add(
+        InlineKeyboardButton(
+            "🏠 Menu",
+            callback_data="menu_inicio"
+        )
+    )
+
+    bot.send_message(
+        user_id,
+        texto,
+        reply_markup=markup
+    )
+
+
+# ==========================================================
+# EXCLUIR PERFIL
+# ==========================================================
+
+@bot.message_handler(commands=["deletar"])
+def confirmar_deletar(message):
+
+    user_id = message.chat.id
+
+    markup = InlineKeyboardMarkup(row_width=2)
+
+    markup.add(
+        InlineKeyboardButton(
+            "✅ Sim",
+            callback_data="confirma_deleta"
+        ),
+        InlineKeyboardButton(
+            "❌ Cancelar",
+            callback_data="cancela_deleta"
+        )
+    )
+
+    bot.send_message(
+        user_id,
+        "⚠️ Tem certeza que deseja apagar seu perfil?\n\nEssa ação não pode ser desfeita.",
+        reply_markup=markup
+    )
+
+
+# ==========================================================
+# CALLBACK EXCLUIR
+# ==========================================================
+
+@bot.callback_query_handler(
+    func=lambda call: call.data in [
+        "confirma_deleta",
+        "cancela_deleta"
+    ]
+)
+def callback_deletar(call):
+
+    user_id = call.message.chat.id
+
+    bot.answer_callback_query(call.id)
+
+    if call.data == "confirma_deleta":
+
+        conn = conectar()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "DELETE FROM perfis WHERE telegram_id=%s",
+            (user_id,)
+        )
+
+        cursor.execute(
+            """
+            DELETE FROM curtidas
+            WHERE de_id=%s
+            OR para_id=%s
+            """,
+            (user_id, user_id)
+        )
+
+        conn.commit()
+        conn.close()
+
+        bot.send_message(
+            user_id,
+            "🗑️ Perfil excluído com sucesso."
+        )
+
+    else:
+
+        bot.send_message(
+            user_id,
+            "❌ Operação cancelada."
+        )
+
+    try:
+        bot.delete_message(
+            user_id,
+            call.message.message_id
+        )
+    except:
+        pass
+
+    enviar_menu(user_id)
+
+
+# ==========================================================
+# CANCELAR
+# ==========================================================
+
+@bot.message_handler(commands=["cancelar"])
+def cancelar_operacao(message):
+
+    user_id = message.chat.id
+
+    if user_id in dados_cadastro:
+        del dados_cadastro[user_id]
+
+    if user_id in dados_edicao:
+        del dados_edicao[user_id]
+
+    bot.send_message(
+        user_id,
+        "❌ Operação cancelada.",
+        reply_markup=teclado_menu()
+    )
+
+
+@bot.callback_query_handler(func=lambda call: call.data == "cancelar")
+def cancelar_botao(call):
+
+    user_id = call.message.chat.id
+
+    if user_id in dados_cadastro:
+        del dados
+
