@@ -1287,11 +1287,66 @@ def mostrar_proximo_perfil(message):
 # =======================================================
 @bot.callback_query_handler(func=lambda c: c.data.startswith("sim_"))
 def curtir_perfil(call):
+# =======================================================
+# # COMANDO: /tinder E FEED DE PERFIS
+# =======================================================
+@bot.message_handler(commands=["tinder"])
+def mostrar_proximo_perfil(message):
+    user_id = message.chat.id if hasattr(message, 'chat') else message.from_user.id
+    
+    try:
+        conn = conectar()
+        cursor = conn.cursor()
+        
+        # Filtra usando ABS() para ignorar curtidas normais e pulos (IDs negativos)
+        cursor.execute("""
+            SELECT telegram_id, nome, bio, foto 
+            FROM perfis 
+            WHERE telegram_id != %s 
+            AND telegram_id NOT IN (
+                SELECT ABS(para_id) 
+                FROM curtidas 
+                WHERE de_id = %s
+            )
+            ORDER BY RANDOM() 
+            LIMIT 1;
+        """, (user_id, user_id))
+        
+        perfil = cursor.fetchone()
+        conn.close()
+        
+        if not perfil:
+            bot.send_message(user_id, "💔 Não há novos perfis disponíveis no momento.")
+            return
+            
+        perfil_id, nome, bio, foto = perfil
+        
+        markup = telebot.types.InlineKeyboardMarkup()
+        btn_sim = telebot.types.InlineKeyboardButton("❤️ Curtir", callback_data=f"sim_{perfil_id}")
+        btn_nao = telebot.types.InlineKeyboardButton("❌ Pular", callback_data=f"nao_{perfil_id}")
+        markup.add(btn_sim, btn_nao)
+        
+        texto = f"🔥 *{nome}*\n\n📝 {bio}"
+        
+        if foto:
+            bot.send_photo(user_id, foto, caption=texto, parse_mode="Markdown", reply_markup=markup)
+        else:
+            bot.send_message(user_id, texto, parse_mode="Markdown", reply_markup=markup)
+            
+    except Exception as e:
+        print(f"Erro ao buscar perfil: {e}")
+        bot.send_message(user_id, "❌ Houve um erro ao carregar o próximo perfil.")
+
+# =======================================================
+# # BOTÃO: CURTIR (❤️)
+# =======================================================
+@bot.callback_query_handler(func=lambda c: c.data.startswith("sim_"))
+def curtir_perfil(call):
     user_id = call.message.chat.id
     
     try:
         # Pega o ID da pessoa separando corretamente por "_"
-        perfil_id = int(call.data.split("_")[1])
+        perfil_id = int(call.data.split("_"))
         
         conn = conectar()
         cursor = conn.cursor()
@@ -1314,6 +1369,59 @@ def curtir_perfil(call):
         
         match = cursor.fetchone()
         conn.close()
+        
+        bot.answer_callback_query(call.id, "Você curtiu o perfil!")
+        
+        if match:
+            nome_match, user_match = match
+            arroba = f" (@{str(user_match).replace('@', '')})" if user_match else ""
+            bot.send_message(user_id, f"🎉 *É um MATCH!* Você e *{nome_match}*{arroba} se curtiram mutuamente!")
+            
+    except Exception as e:
+        print(f"Erro ao curtir: {e}")
+        bot.answer_callback_query(call.id, "Erro ao processar curtida.")
+        
+    try:
+        bot.delete_message(user_id, call.message.message_id)
+    except:
+        pass
+        
+    mostrar_proximo_perfil(call.message)
+
+# =======================================================
+# # BOTÃO: REJEITAR / PULAR (❌)
+# =======================================================
+@bot.callback_query_handler(func=lambda c: c.data.startswith("nao_"))
+def nao_curtir(call):
+    user_id = call.message.chat.id
+    
+    try:
+        perfil_id = int(call.data.split("_"))
+        
+        conn = conectar()
+        cursor = conn.cursor()
+        
+        # Salva como NEGATIVO para o /matches ignorar, mas o feed não repetir
+        cursor.execute("""
+            INSERT INTO curtidas (de_id, para_id)
+            VALUES (%s, %s)
+            ON CONFLICT DO NOTHING;
+        """, (user_id, -perfil_id))
+        
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Erro ao salvar pulo: {e}")
+
+    bot.answer_callback_query(call.id, "Perfil ignorado.")
+    
+    try:
+        bot.delete_message(user_id, call.message.message_id)
+    except:
+        pass
+        
+    mostrar_proximo_perfil(call.message)
+
         
         bot.answer_callback_query(call.id, "Você curtiu o perfil!")
         
