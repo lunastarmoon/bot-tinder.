@@ -1103,9 +1103,9 @@ def nao_curtir(call):
     
     try:
         bot.delete_message(user_id, call.message.message_id)
-    except:
+    except Exception:
         pass
-        
+
     mostrar_proximo_perfil(call.message)
     
 # =======================================================
