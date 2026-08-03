@@ -1073,31 +1073,40 @@ def mostrar_proximo_perfil(message):
 
     )
 
-# ==========================================================
-# BOTÃO ❌ NÃO CURTIR
-# ==========================================================
+# =======================================================
+# # BOTÃO X NÃO CURTIR (CORRIGIDO)
+# =======================================================
 
 @bot.callback_query_handler(func=lambda c: c.data.startswith("nao_"))
 def nao_curtir(call):
-
     user_id = call.message.chat.id
-
-    bot.answer_callback_query(
-        call.id,
-        "Perfil ignorado."
-    )
-
+    
     try:
+        # Pega o ID da pessoa que está sendo pulada a partir do botão
+        perfil_id = int(call.data.split("_")[1])
+        
+        # Conecta e registra na tabela curtidas que você já interagiu com esse perfil
+        conn = conectar()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO curtidas (de_id, para_id)
+            VALUES (%s, %s)
+            ON CONFLICT DO NOTHING;
+        """, (user_id, perfil_id))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Erro ao salvar pulo: {e}")
 
-        bot.delete_message(
-            user_id,
-            call.message.message_id
-        )
-
+    bot.answer_callback_query(call.id, "Perfil ignorado.")
+    
+    try:
+        bot.delete_message(user_id, call.message.message_id)
     except:
         pass
-
+        
     mostrar_proximo_perfil(call.message)
+
     # ==========================================================
 # BOTÃO ❤️ CURTIR
 # ==========================================================
