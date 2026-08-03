@@ -1323,97 +1323,68 @@ def nao_curtir(call):
 
     # Mostra outro perfil
     mostrar_proximo_perfil(call.message)
-# ==========================================================
-# VER MATCHES
-# ==========================================================
-
+# =======================================================
+# # COMANDO: /matches (PERMANENTE COM FILTRO DE PULO)
+# =======================================================
 @bot.message_handler(commands=["matches"])
 def ver_meus_matches(message):
-
     user_id = message.chat.id
-
+    
     conn = conectar()
     cursor = conn.cursor()
-
+    
+    # Filtra trazendo apenas curtidas reais maiores que zero (> 0)
     cursor.execute("""
         SELECT p.nome, p.username
         FROM perfis p
-
         WHERE p.telegram_id IN (
-
             SELECT para_id
             FROM curtidas
-            WHERE de_id=%s
-
+            WHERE de_id = %s AND para_id > 0
         )
-
         AND p.telegram_id IN (
-
             SELECT de_id
             FROM curtidas
-            WHERE para_id=%s
-
+            WHERE para_id = %s AND de_id > 0
         )
-
         ORDER BY p.nome
-
     """, (user_id, user_id))
-
-
+    
     matches = cursor.fetchall()
-
     conn.close()
-
-
+    
     if not matches:
-
         bot.send_message(
             user_id,
-            "💔 Você ainda não possui nenhum match."
+            "💖 Você ainda não possui nenhum match."
         )
         return
-
-
-    texto = "💌 *Seus Matches*\n\n"
-
-
+        
+    texto = "💌 *Seus Matches:*\n\n"
+    
     for pessoa in matches:
-
         nome = pessoa[0]
         username = pessoa[1]
-
+        
         if username:
-
-            texto += f"❤️ {nome} (@{username})\n"
-
+            user_limpo = str(username).replace("@", "")
+            texto += f"❤️ {nome} (@{user_limpo})\n"
         else:
-
             texto += f"❤️ {nome}\n"
-
-
+            
+    # Mantém o teclado de botões original que você já tinha criado
     markup = InlineKeyboardMarkup(row_width=2)
-
-
     markup.add(
-
-        InlineKeyboardButton(
-            "❤️ Continuar",
-            callback_data="continuar_tinder"
-        ),
-
-        InlineKeyboardButton(
-            "🏠 Menu",
-            callback_data="menu_inicio"
-        )
-
+        InlineKeyboardButton("❤️ Continuar", callback_data="continuar_tinder"),
+        InlineKeyboardButton("🏠 Menu", callback_data="menu_inicio")
     )
-
-
+    
     bot.send_message(
         user_id,
         texto,
+        parse_mode="Markdown",
         reply_markup=markup
-        )
+    )
 
 # ==========================================================
 # BOTÕES DO MATCH
