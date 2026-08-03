@@ -1386,6 +1386,26 @@ def ver_meus_matches(message):
         reply_markup=markup
     )
 
+# =======================================================
+# COMANDO TEMPORÁRIO: /limpar_antigos
+# =======================================================
+@bot.message_handler(commands=["limpar_antigos"])
+def limpar_historico_antigo(message):
+    user_id = message.chat.id
+    try:
+        conn = conectar()
+        cursor = conn.cursor()
+        
+        # Apaga registros antigos para limpar o histórico com bugs
+        cursor.execute("DELETE FROM curtidas WHERE de_id = %s OR para_id = %s;", (user_id, user_id))
+        
+        conn.commit()
+        conn.close()
+        
+        bot.send_message(user_id, "🧹 *Faxina Concluída!* Seu histórico antigo de interações foi zerado. Agora o sistema novo de Likes e Pulos funcionará perfeitamente sem misturar nada.")
+    except Exception as e:
+        bot.send_message(user_id, f"❌ Erro na faxina: {e}")
+
 # ==========================================================
 # BOTÕES DO MATCH
 # ==========================================================
