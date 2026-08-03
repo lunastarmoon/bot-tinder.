@@ -36,36 +36,6 @@ dados_edicao = {}
 # =======================================================
 # CONFIGURAÇÃO INICIAL DO BANCO DE DADOS
 # =======================================================
-def inicializar_banco():
-    import sqlite3
-    conexao = sqlite3.connect("tinder.db")
-    cursor = conexao.cursor()
-    
-    # 1. Tabela para salvar os perfis dos usuários
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS usuarios (
-        chat_id INTEGER PRIMARY KEY,
-        nome TEXT,
-        bio TEXT,
-        foto TEXT
-    );
-    """)
-    
-    # 2. Tabela para registrar as curtidas (Quem curtiu Quem)
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS curtidas (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        quem_curtiu INTEGER,
-        perfil_curtido INTEGER,
-        status TEXT DEFAULT 'pendente'
-    );
-    """)
-    
-    conexao.commit()
-    conexao.close()
-
-# Executa a função para garantir que o banco existe antes do bot rodar
-inicializar_banco()
 
 # ==========================================================
 # SERVIDOR HTTP (RENDER)
@@ -238,19 +208,17 @@ def start(message):
     )
 
 # =======================================================
-# # CURTIDAS (CORRIGIDO COM A ESTRUTURA REAL DO BANCO)
 # =======================================================
-# # COMANDO: /meus_likes
+# # COMANDO: /meus_likes (PERMANENTE)
 # =======================================================
 @bot.message_handler(commands=["meus_likes"])
 def mostrar_meus_likes(message):
     user_id = message.chat.id
     
     try:
-        conn = conectar()
+        conn = conectar()  # Conecta direto no banco que não apaga
         cursor = conn.cursor()
         
-        # Busca os NOMES e USER_NAMES dos perfis que VOCÊ curtiu (de_id é você)
         cursor.execute("""
             SELECT p.nome, p.username 
             FROM curtidas c
@@ -282,17 +250,16 @@ def mostrar_meus_likes(message):
 
 
 # =======================================================
-# # COMANDO: /quem_me_curtiu
+# # COMANDO: /quem_me_curtiu (PERMANENTE)
 # =======================================================
 @bot.message_handler(commands=["quem_me_curtiu"])
 def mostrar_quem_me_curtiu(message):
     user_id = message.chat.id
     
     try:
-        conn = conectar()
+        conn = conectar()  # Conecta direto no banco que não apaga
         cursor = conn.cursor()
         
-        # Busca os NOMES e USER_NAMES de quem curtiu VOCÊ (para_id é você)
         cursor.execute("""
             SELECT p.nome, p.username 
             FROM curtidas c
