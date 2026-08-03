@@ -300,55 +300,53 @@ def salvar_foto(message):
     foto = message.photo[-1].file_id
     bot.send_message(user_id, "⏳ Foto recebida, salvando...")
 
-    conn = conectar()
+        conn = conectar()
+        cursor = conn.cursor()
 
-cursor = conn.cursor()
+    bot.send_message(user_id, "⚙️ Conectando ao banco...")
 
-bot.send_message(user_id, "⚙️ Conectando ao banco...")
-
-try:
-    cursor.execute("""
-        INSERT INTO perfis (
-            telegram_id,
-            nome,
-            idade,
-            bio,
+    try:
+        cursor.execute("""
+            INSERT INTO perfis (
+                telegram_id,
+                nome,
+                idade,
+                bio,
+                foto,
+                username
+            )
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (
+            user_id,
+            dados_cadastro[user_id]["nome"],
+            dados_cadastro[user_id]["idade"],
+            dados_cadastro[user_id]["bio"],
             foto,
-            username
+            dados_cadastro[user_id]["username"]
+        ))
+
+        conn.commit()
+
+        bot.send_message(
+            user_id,
+            "✅ Perfil criado com sucesso!"
         )
-        VALUES (%s, %s, %s, %s, %s, %s)
-    """, (
-        user_id,
-        dados_cadastro[user_id]["nome"],
-        dados_cadastro[user_id]["idade"],
-        dados_cadastro[user_id]["bio"],
-        foto,
-        dados_cadastro[user_id]["username"]
-    ))
 
-    conn.commit()
+        enviar_menu(user_id)
 
-    bot.send_message(
-        user_id,
-        "✅ Perfil criado com sucesso!"
-    )
+        del dados_cadastro[user_id]
 
-    enviar_menu(user_id)
+    except Exception as e:
 
-    del dados_cadastro[user_id]
+        bot.send_message(
+            user_id,
+            f"❌ Erro ao salvar perfil: {e}"
+        )
 
-except Exception as e:
+    finally:
+        conn.close()
 
-    bot.send_message(
-        user_id,
-        f"❌ Erro ao salvar perfil: {e}"
-    )
-
-finally:
-
-    conn.close()
-
-
+    
 # ==========================================================
 # VER MEU PERFIL
 # ==========================================================
