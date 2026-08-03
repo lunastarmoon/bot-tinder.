@@ -289,23 +289,39 @@ def salvar_bio(message):
     bot.register_next_step_handler(msg, salvar_foto)
 
 def salvar_foto(message):
+
     user_id = message.chat.id
+
     if user_id not in dados_cadastro:
         return
+
     if message.content_type != "photo":
-        msg = bot.send_message(user_id, "❌ Envie uma foto.")
+
+        msg = bot.send_message(
+            user_id,
+            "❌ Envie uma foto."
+        )
+
         bot.register_next_step_handler(msg, salvar_foto)
         return
 
     foto = message.photo[-1].file_id
-    bot.send_message(user_id, "⏳ Foto recebida, salvando...")
 
-        conn = conectar()
-        cursor = conn.cursor()
+    bot.send_message(
+        user_id,
+        "⏳ Foto recebida, salvando..."
+    )
 
-    bot.send_message(user_id, "⚙️ Conectando ao banco...")
+    conn = conectar()
+    cursor = conn.cursor()
+
+    bot.send_message(
+        user_id,
+        "⚙️ Conectando ao banco..."
+    )
 
     try:
+
         cursor.execute("""
             INSERT INTO perfis (
                 telegram_id,
@@ -340,12 +356,12 @@ def salvar_foto(message):
 
         bot.send_message(
             user_id,
-            f"❌ Erro ao salvar perfil: {e}"
+            f"❌ Erro ao salvar perfil:\n{e}"
         )
 
     finally:
-        conn.close()
 
+        conn.close()
     
 # ==========================================================
 # VER MEU PERFIL
