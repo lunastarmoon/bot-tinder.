@@ -117,8 +117,8 @@ def iniciar_banco():
     conn.commit()
     conn.close()
 
-
 iniciar_banco()
+
 # ==========================================================
 # TECLADOS
 # ==========================================================
@@ -211,6 +211,7 @@ def start(message):
 # =======================================================
 # # COMANDO: /meus_likes (PERMANENTE)
 # =======================================================
+
 @bot.message_handler(commands=["meus_likes"])
 def mostrar_meus_likes(message):
     user_id = message.chat.id
@@ -247,7 +248,6 @@ def mostrar_meus_likes(message):
     except Exception as erro:
         bot.send_message(user_id, f"❌ Erro ao acessar seus likes: {erro}")
         return
-
 
 # =======================================================
 # # COMANDO: /quem_me_curtiu (PERMANENTE)
@@ -373,7 +373,8 @@ def botoes_menu(call):
             "✏️ Editar Perfil - edite seu perfil\n"
             "🗑 Excluir Perfil - exclua seu perfil todo\n"
                              )
-        # ==========================================================
+        
+# ==========================================================
 # CADASTRO
 # ==========================================================
 
@@ -593,7 +594,8 @@ def salvar_foto(message):
     finally:
 
         conn.close()
-    # ==========================================================
+        
+# ==========================================================
 # VER MEU PERFIL
 # ==========================================================
 
@@ -734,7 +736,6 @@ def ver_matches(message):
     except Exception as erro:
         bot.send_message(user_id, f"❌ Erro ao buscar seus matches: {erro}")
         return
-
 
 # ==========================================================
 # MENU EDITAR
@@ -1099,8 +1100,6 @@ def nao_curtir(call):
     except Exception as e:
         print(f"Erro ao salvar pulo: {e}")
 
-    bot.answer_callback_query(call.id, "Perfil ignorado.")
-    
     try:
         bot.delete_message(user_id, call.message.message_id)
     except Exception:
@@ -1275,7 +1274,8 @@ def voltar_menu(call):
         pass
 
     enviar_menu(call.message.chat.id)
-    # ==========================================================
+    
+# ==========================================================
 # ESTATÍSTICAS DO PERFIL
 # ==========================================================
 
@@ -1363,7 +1363,6 @@ def estatisticas_perfil(message):
         reply_markup=markup
     )
 
-
 # ==========================================================
 # MELHORAR VISUAL DO PERFIL
 # ==========================================================
@@ -1382,7 +1381,8 @@ def abrir_perfil_botao(call):
         pass
 
     ver_meu_perfil(call.message)
-    # ==========================================================
+    
+# ==========================================================
 # EXCLUIR PERFIL
 # ==========================================================
 
@@ -1442,7 +1442,6 @@ def confirmar_deletar(message):
 
     )
 
-
 # ==========================================================
 # CONFIRMAÇÃO DE EXCLUSÃO
 # ==========================================================
@@ -1475,7 +1474,7 @@ def processar_delete(call):
 
 
 
-    # Apagar tudo
+  # Apagar tudo
 
     conn = conectar()
     cursor = conn.cursor()
@@ -1520,7 +1519,8 @@ def processar_delete(call):
         call.message.message_id
 
     )
-    # ==========================================================
+    
+# ==========================================================
 # FUNÇÃO DE VERIFICAÇÃO DE PERFIL
 # ==========================================================
 
@@ -1544,7 +1544,6 @@ def possui_perfil(user_id):
 
     return resultado is not None
 
-
 # ==========================================================
 # PROTEÇÃO DO TINDER
 # ==========================================================
@@ -1563,7 +1562,6 @@ def verificar_tinder(message):
         return False
 
     return True
-
 
 # ==========================================================
 # BOTÃO CONTINUAR TINDER
@@ -1587,8 +1585,6 @@ def continuar_tinder_botao(call):
 
     mostrar_proximo_perfil(call.message)
 
-
-
 # ==========================================================
 # COMANDO TINDER COM PROTEÇÃO
 # ==========================================================
@@ -1599,8 +1595,6 @@ def abrir_tinder(message):
     if verificar_tinder(message):
 
         mostrar_proximo_perfil(message)
-
-
 
 # ==========================================================
 # TRATAMENTO DE ERROS GERAIS
@@ -1648,7 +1642,8 @@ def mensagens_sem_funcao(message):
         reply_markup=teclado_menu()
 
         )
-    # ==========================================================
+    
+# ==========================================================
 # MENU PRINCIPAL
 # ==========================================================
 
@@ -1656,7 +1651,6 @@ def mensagens_sem_funcao(message):
 def comando_menu(message):
 
     enviar_menu(message.chat.id)
-
 
 # ==========================================================
 # MENU ATUALIZADO
@@ -1731,7 +1725,6 @@ def enviar_menu(chat_id):
 
     )
 
-
 # ==========================================================
 # NOVOS BOTÕES DO MENU
 # ==========================================================
@@ -1777,7 +1770,6 @@ def botoes_menu(call):
         confirmar_deletar(call.message)
 
 
-
 # ==========================================================
 # COMANDO AJUDA MELHORADO
 # ==========================================================
@@ -1804,7 +1796,8 @@ def comando_ajuda(message):
         message.chat.id,
         texto
     )
-    # ==========================================================
+    
+# ==========================================================
 # LIMPEZA DE DADOS TEMPORÁRIOS
 # ==========================================================
 
@@ -1812,7 +1805,6 @@ def limpar_dados_temporarios():
 
     dados_cadastro.clear()
     dados_edicao.clear()
-
 
 # ==========================================================
 # COMANDO REINICIAR MENU
@@ -1835,7 +1827,6 @@ def cancelar_operacao(message):
         "❌ Operação cancelada.",
         reply_markup=teclado_menu()
     )
-
 
 # ==========================================================
 # BOTÃO CANCELAR
@@ -1862,7 +1853,6 @@ def cancelar_botao(call):
 
 
     enviar_menu(user_id)
-
 
 # ==========================================================
 # MENSAGEM DE STATUS
@@ -1901,6 +1891,7 @@ def iniciar_bot():
             print(f"Erro no bot: {erro}")
 
             time.sleep(5)
+            
 # ==========================================================
 # EXECUTAR BOT
 # ==========================================================
