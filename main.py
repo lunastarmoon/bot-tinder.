@@ -680,59 +680,61 @@ def ver_meu_perfil(message):
         reply_markup=markup
     )
 
-# ==========================================================
-# VER MATCHES
-# ==========================================================
+# =======================================================
+# # COMANDO: /matches (PERMANENTE COM @USERNAME)
+# =======================================================
 
 @bot.message_handler(commands=["matches"])
 def ver_matches(message):
     
     user_id = message.chat.id
     
-    conn = conectar()
-    cursor = conn.cursor()
-    
-    # Adicionamos p.username na busca para puxar o @ de cada perfil
-    cursor.execute("""
-        SELECT p.nome, p.telegram_id, p.username
-        FROM perfis p
-        WHERE p.telegram_id IN (
-            SELECT para_id
-            FROM curtidas
-            WHERE de_id = %s
-        )
-        AND p.telegram_id IN (
-            SELECT de_id
-            FROM curtidas
-            WHERE para_id = %s
-        )
-    """, (user_id, user_id))
-    
-    matches = cursor.fetchall()
-    conn.close()
-    
-    if not matches:
-        bot.send_message(
-            user_id,
-            "💔 Você ainda não tem nenhum match."
-        )
-        return
+    try:
+        conn = conectar()
+        cursor = conn.cursor()
         
-    texto = "💌 Seus Matches:\n\n"
-    
-    # Agora o Python lê o nome, o id e o username de cada match
-    for nome, id_pessoa, username in matches:
-        if username:
-            # Remove o @ caso ele já esteja salvo com o símbolo no banco
-            user_limpo = str(username).replace("@", "")
-            texto += f"❤️ {nome} (@{user_limpo})\n"
-        else:
-            texto += f"❤️ {nome}\n"
+        # Busca os nomes e usernames combinando quem se curtiu mutuamente
+        cursor.execute("""
+            SELECT p.nome, p.telegram_id, p.username
+            FROM perfis p
+            WHERE p.telegram_id IN (
+                SELECT para_id
+                FROM curtidas
+                WHERE de_id = %s
+            )
+            AND p.telegram_id IN (
+                SELECT de_id
+                FROM curtidas
+                WHERE para_id = %s
+            )
+        """, (user_id, user_id))
+        
+        matches = cursor.fetchall()
+        conn.close()
+        
+        if not matches:
+            bot.send_message(
+                user_id,
+                "💔 Você ainda não tem nenhum match."
+            )
+            return
             
-    bot.send_message(
-        user_id,
-        texto
-    )
+        texto = "💌 Seus Matches:\n\n"
+        
+        for nome, id_pessoa, username in matches:
+            if username:
+                user_limpo = str(username).replace("@", "")
+                texto += f"❤️ {nome} (@{user_limpo})\n"
+            else:
+                texto += f"❤️ {nome}\n"
+                
+        bot.send_message(user_id, texto)
+        return
+
+    except Exception as erro:
+        bot.send_message(user_id, f"❌ Erro ao buscar seus matches: {erro}")
+        return
+
 
 # ==========================================================
 # MENU EDITAR
