@@ -959,6 +959,7 @@ def salvar_edicao_foto(message):
         user_id,
         "✅ Foto atualizada!"
 )
+    
 # ==========================================================
 # TINDER
 # ==========================================================
@@ -1106,9 +1107,11 @@ def nao_curtir(call):
         pass
         
     mostrar_proximo_perfil(call.message)
+    
 # =======================================================
 # # COMANDO: /tinder E FEED DE PERFIS
 # =======================================================
+
 @bot.message_handler(commands=["tinder"])
 def mostrar_proximo_perfil(message):
     user_id = message.chat.id if hasattr(message, 'chat') else message.from_user.id
@@ -1282,11 +1285,6 @@ def mostrar_proximo_perfil(message):
         print(f"Erro ao buscar perfil: {e}")
         bot.send_message(user_id, "❌ Houve um erro ao carregar o próximo perfil.")
 
-# =======================================================
-# # BOTÃO: CURTIR (❤️)
-# =======================================================
-@bot.callback_query_handler(func=lambda c: c.data.startswith("sim_"))
-def curtir_perfil(call):
 # =======================================================
 # # COMANDO: /tinder E FEED DE PERFIS
 # =======================================================
@@ -1466,27 +1464,6 @@ def nao_curtir(call):
     except Exception as e:
         print(f"Erro ao salvar pulo: {e}")
 
-    bot.answer_callback_query(call.id, "Perfil ignorado.")
-    
-    try:
-        bot.delete_message(user_id, call.message.message_id)
-    except:
-        pass
-        
-    mostrar_proximo_perfil(call.message)
-
-        except:
-            pass
-
-    else:
-
-        bot.answer_callback_query(
-            call.id,
-            "❤️ Curtida enviada!"
-        )
-
-    # Mostra outro perfil
-    mostrar_proximo_perfil(call.message)
 # =======================================================
 # # COMANDO: /matches (PERMANENTE COM FILTRO DE PULO)
 # =======================================================
