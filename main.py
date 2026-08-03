@@ -1235,6 +1235,7 @@ def nao_curtir(call):
     
     try:
         bot.delete_message(user_id, call.message.message_id)
+        
 # =======================================================
 # # COMANDO: /tinder E FEED DE PERFIS
 # =======================================================
@@ -1369,23 +1370,6 @@ def curtir_perfil(call):
         conn.close()
         
         bot.answer_callback_query(call.id, "Você curtiu o perfil!")
-        
-        if match:
-            nome_match, user_match = match
-            arroba = f" (@{str(user_match).replace('@', '')})" if user_match else ""
-
-# =======================================================
-# COMANDO TEMPORÁRIO: /limpar_antigos
-# =======================================================
-@bot.message_handler(commands=["limpar_antigos"])
-def limpar_historico_antigo(message):
-    user_id = message.chat.id
-    try:
-        conn = conectar()
-        cursor = conn.cursor()
-        
-        # Apaga registros antigos para limpar o histórico com bugs
-        cursor.execute("DELETE FROM curtidas WHERE de_id = %s OR para_id = %s;", (user_id, user_id))
         
         conn.commit()
         conn.close()
